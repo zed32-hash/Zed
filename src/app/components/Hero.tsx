@@ -3,9 +3,10 @@ import { FloatingShapes } from "./FloatingShapes";
 
 interface HeroProps {
   dark: boolean;
+  onLaunchApp?: () => void;
 }
 
-export function Hero({ dark }: HeroProps) {
+export function Hero({ dark, onLaunchApp }: HeroProps) {
   return (
     <section
       className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 pt-24 overflow-hidden"
@@ -113,8 +114,8 @@ export function Hero({ dark }: HeroProps) {
           transition={{ duration: 0.6, delay: 0.38 }}
           className="flex flex-col sm:flex-row items-center justify-center gap-4"
         >
-          <a
-            href="#"
+          <button
+            onClick={onLaunchApp}
             className="px-8 py-4 rounded-2xl transition-all group"
             style={{
               background: "linear-gradient(135deg, #5C31F2, #7C3AED)",
@@ -124,8 +125,8 @@ export function Hero({ dark }: HeroProps) {
               fontSize: "1rem",
               letterSpacing: "-0.01em",
               boxShadow: "0 8px 32px rgba(92,49,242,0.45), inset 0 1px 0 rgba(255,255,255,0.15)",
-              textDecoration: "none",
-              display: "inline-block",
+              border: "none",
+              cursor: "pointer",
               transition: "transform 0.2s, box-shadow 0.2s",
             }}
             onMouseEnter={(e) => {
@@ -138,7 +139,7 @@ export function Hero({ dark }: HeroProps) {
             }}
           >
             Launch App →
-          </a>
+          </button>
 
           <a
             href="#"

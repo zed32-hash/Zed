@@ -5,9 +5,10 @@ import { motion, AnimatePresence } from "motion/react";
 interface NavbarProps {
   dark: boolean;
   onToggleDark: () => void;
+  onLaunchApp?: () => void;
 }
 
-export function Navbar({ dark, onToggleDark }: NavbarProps) {
+export function Navbar({ dark, onToggleDark, onLaunchApp }: NavbarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -80,8 +81,8 @@ export function Navbar({ dark, onToggleDark }: NavbarProps) {
           {dark ? <Sun size={16} /> : <Moon size={16} />}
         </button>
 
-        <a
-          href="#"
+        <button
+          onClick={onLaunchApp}
           className="hidden md:flex items-center px-5 py-2 rounded-xl transition-all"
           style={{
             background: "linear-gradient(135deg, #5C31F2, #7C3AED)",
@@ -90,11 +91,12 @@ export function Navbar({ dark, onToggleDark }: NavbarProps) {
             fontWeight: 600,
             fontSize: "0.875rem",
             boxShadow: "0 4px 16px rgba(92,49,242,0.4), inset 0 1px 0 rgba(255,255,255,0.15)",
-            textDecoration: "none",
+            border: "none",
+            cursor: "pointer",
           }}
         >
           Launch App
-        </a>
+        </button>
 
         <button
           className="md:hidden w-9 h-9 rounded-xl flex items-center justify-center"

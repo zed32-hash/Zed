@@ -1,0 +1,108 @@
+Act as a Senior Full-Stack Engineer specializing in React, Tailwind CSS, and Firebase (v10+). 
+
+You are building the functional core of "Zed" (short form "Z"), an anonymous dating web application. The landing page design is already complete. Your task is to build out the remaining web app views, routing, and complete backend integration using Firebase Auth, Firestore, and Cloud Functions/Security Rules.
+
+CRITICAL ARCHITECTURAL REQUIREMENT: Absolutely no frontend mock workarounds or hardcoded "const" data bypasses for core security rules. All operational limits, counts, reporting statuses, and matchmaking parameters must be driven by and validated against the Firebase database to ensure a fully fresh, secure, active application.
+
+### 1. VISUAL SYSTEM & STYLING (Match Existing Aesthetic)
+- Theme: Neo-Brutalist Pop / Claymorphism. 
+- Palette: Background uses a fine-grain noise overlay with gradients shifting from Warm Cream (#FBF9F4) to Soft Lavender (#E3DCF8) and Sky Blue (#D9E7F9). Deep Midnight Indigo (#1A173B) for primary typography. Electric Violet (#5C31F2) for primary CTAs.
+- Logo/Icon Element: Use the unified "Z" logo styling: a thick, 3D-sculpted matte purple 'Z' containing an embedded minimalist padlock/mask icon.
+- Typography: Headings in ultra-bold display style (e.g., Clash Display or Syne style via Tailwind weights). Body in geometric sans-serif (Plus Jakarta Sans).
+
+### 2. FIREBASE BACKEND CONFIGURATION & SCHEMA
+
+Implement Firestore collections with the exact structures below:
+
+- /users/{uid}
+  {
+    "uid": string,
+    "username": string (anonymous alias),
+    "avatarUrl": string (DiceBear avatar API URL generated from seed),
+    "bio": string,
+    "tags": array of strings,
+    "isGhostMode": boolean,
+    "dailyMessageCount": number,
+    "lastMessageReset": timestamp,
+    "status": string ("active" | "suspended"),
+    "reportCount": number,
+    "location": { "geohash": string, "lat": number, "lng": number }
+  }
+
+- /swipes/{swipeId} (Composite key: swiperId_targetId)
+  {
+    "swiperId": string,
+    "targetId": string,
+    "type": string ("like" | "pass"),
+    "timestamp": timestamp
+  }
+
+- /chats/{chatId}
+  {
+    "participants": array [uid1, uid2],
+    "createdAt": timestamp,
+    "expiresAt": timestamp (createdAt + 24 hours),
+    "status": string ("active" | "unlocked" | "expired"),
+    "messageCount": number,
+    "lastMessageTimestamp": timestamp
+  }
+
+- /chats/{chatId}/messages/{messageId}
+  {
+    "senderId": string,
+    "text": string,
+    "timestamp": timestamp
+  }
+
+- /reports/{reportId}
+  {
+    "reporterId": string,
+    "reportedId": string,
+    "reason": string,
+    "timestamp": timestamp
+  }
+
+### 3. COMPONENT & PAGE SPECIFICATIONS TO BUILD
+
+#### VIEW 1: AUTHENTICATION & ONBOARDING
+- Path: `/signup` and `/onboarding`
+- Process: Integrate Firebase Auth (Email/Password & Google). Upon first login, force redirect to `/onboarding`.
+- Features:
+  1. Username input with dynamic checking against Firestore to prevent duplicates.
+  2. Avatar Selection: Implement an inline preview widget using the DiceBear Avatars API. Give users a "🎲 Randomize" button that swaps random string seeds to generate cool, abstract vector graphics.
+  3. Tag Picker: A flexbox grid of styling pills containing pre-set tags (#gaming, #cooking, #indierock, #scifi, #fitness, #art). Users select 3 to 7.
+  4. Location Capture: Call native browser `navigator.geolocation.getCurrentPosition`. Convert coordinates to a geohash on write via a utility package (like `geofire-common`) to save coordinates securely.
+
+#### VIEW 2: HOMEPAGE DISCOVERY SWIPE DECK
+- Path: `/app`
+- Features:
+  1. Swipe Deck Engine: Integrate `react-tinder-card`. Fetch potential matches matching location constraints or tag alignments. Exclude users who have `isGhostMode: true` or accounts with `status: "suspended"`. Exclude users already swiped on.
+  2. Toggle Filters: Add a stylized top-navigation filter switch button allowing users to shift matching priorities between "Closest Location" (Geohash boundary sorting) and "Most Shared Tags" (Array intersection sorting in frontend computation loop).
+  3. Card Layout: Display the avatar, alias name, and tags. Include a dedicated panel inside the card displaying an "AI-Generated Compatibility Summary" derived dynamically by mapping matching tag intersections into quirky, pre-structured text lines.
+  4. Username Search Bar: A minimal text search input on the top panel executing exact match Firestore queries against the `username` field. If found, display their card for instant swiping.
+
+#### VIEW 3: INBOX & REAL-TIME CHAT
+- Path: `/chat/:chatId` and `/inbox`
+- Features:
+  1. Real-Time Sync: Connect chat messages to Firestore using an `onSnapshot` listener for instant real-time message feeds.
+  2. The 24-Hour Countdown Clock: Read the chat's `expiresAt` property. Display a ticking, live countdown timer banner. If both participants send at least 1 message, write an update to set `status: "unlocked"` and completely clear the timer layout. If time runs out before mutual interaction, the UI locks input actions and marks the screen as expired.
+  3. The 20-Message Daily Boundary: Check the user's `dailyMessageCount`. If the count is >= 20, completely disable the message textarea and display a prompt indicating "Daily conversation energy spent. Resets at midnight." Implement a local write update that increments `dailyMessageCount` synchronously inside a transaction when a message document successfully outputs.
+  4. Icebreaker Prompts: Extract overlapping tags. If a match shares tags, pin an explicit conversation prompt box to the top header (e.g., "You both love #indierock. Ask them what album they have on repeat!"). If no tags match, pull a random quirky "Would You Rather" question from a local index.
+  5. Tiered Info Unlocks: Condition elements of the match profile blur styling on the container's parent `messageCount` value:
+     - 0-15 Messages: Avatar is heavily blurred (`blur-md`); basic tags only.
+     - 16-50 Messages: Unblur additional bio text answers and custom preferences.
+     - 51+ Messages: Completely strip the avatar blur component (`blur-none`) to reveal their full abstract image choice.
+  6. Moderation / Report Engine: Place a clear "🚨 Report Account" flag element inside the header navigation. Triggering this opens an overlay modal allowing reasons selection. Writing a report logs to `/reports` and increments the target's `reportCount`. If `reportCount` reaches 3, flag the user's status field as "suspended".
+
+#### VIEW 4: THE "BLIND DATE" HAPPY HOUR OVERLAY
+- Path: Globally listener context applied over `/app`
+- Features:
+  1. Timer Mechanism: Build a global state listener checking system times. When the machine clock rolls over to exactly 8:00 PM local time, lock the standard swipe interface with a prominent full-width visual window takeover: "HAPPY HOUR IS LIVE. TAP TO CHAT BLIND."
+  2. Matchmaking Engine: Tapping the entry CTA pushes the user's profile ID to a global node array loop (`happyHourQueue`). The script pairs concurrent active IDs together, spins up a short-lived temporary chat room template, and pushes them directly into a fast-paced 5-minute speed chat view.
+  3. The Verdict Interface: When the 5-minute window expires, instantly freeze the chat box inputs and display two options: `[ Reveal Profile ]` and `[ Exit Deck ]`. If and only if both parties submit mutual "Reveal" responses within a 60-second execution window, save an asset reference creating a regular, persistent connection document inside the core `/chats` space.
+
+### 4. BUILD PIPELINE INSTRUCTIONS FOR REPLIT AGENT
+1. Initialize the directory framework using Vite or standard Create React App setup with Tailwind CSS configurations tracking our Neo-Brutalist color theme profiles.
+2. Install crucial dependency allocations: `npm install firebase geofire-common react-tinder-card lucide-react date-fns react-router-dom`.
+3. Scaffold the base routing rules using React Router Dom for `/`, `/signup`, `/onboarding`, `/app`, `/inbox`, and `/chat/:id`.
+4. Implement the explicit modular files under `src/firebase/config.js` and structure all component dependencies cleanly. Build out each feature step-by-step, ensuring every data write directly maps to Firestore.
