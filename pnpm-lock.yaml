@@ -104,6 +104,9 @@ importers:
       '@radix-ui/react-tooltip':
         specifier: 1.1.8
         version: 1.1.8(@types/react@19.2.15)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@react-spring/web':
+        specifier: ^10.1.0
+        version: 10.1.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       canvas-confetti:
         specifier: 1.9.4
         version: 1.9.4
@@ -175,7 +178,7 @@ importers:
         version: 0.31.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-tinder-card:
         specifier: ^1.6.4
-        version: 1.6.4(react@18.3.1)
+        version: 1.6.4(@react-spring/web@10.1.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       recharts:
         specifier: 2.15.2
         version: 2.15.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -1533,6 +1536,33 @@ packages:
 
   '@react-dnd/shallowequal@4.0.2':
     resolution: {integrity: sha512-/RVXdLvJxLg4QKvMoM5WlwNR9ViO9z8B/qPcc+C0Sa/teJY7QG7kJ441DwzOjMYEY7GmU4dj5EcGHIkKZiQZCA==}
+
+  '@react-spring/animated@10.1.0':
+    resolution: {integrity: sha512-dvGVSfNYhbkzTAnyB1S1940ZiKp6/Ey+b2vQc70dJ5k6gzH/GdlfeDzCh65V94b6OPqF7Xl4VUICVUQpc07iUg==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+
+  '@react-spring/core@10.1.0':
+    resolution: {integrity: sha512-XUG3UCCCxay6lYjBU2KOKzEgC1sx/w44ouB5gRh2Ex6rVJOdPcGVg7JJUIOAQo7uhKGfQdCQU4qUZaQnmInZPQ==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+
+  '@react-spring/rafz@10.1.0':
+    resolution: {integrity: sha512-e/LRnNmvmg8Agl4j3MGcjHuSTSBcCrxr3xeoWdodxpLWeTHY1pHl8PJDOCEJ2Pj6BMdEBaWFRAX7uxRo1FLzCg==}
+
+  '@react-spring/shared@10.1.0':
+    resolution: {integrity: sha512-ogIUujWxdwcsQ2Vp2hZs+KehvH8tKeWGHsFb1eRBYoePzhKS541Qg1JfFlQ7ursBUwwPDBQ5Wpwn+Cwx6WV1PQ==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+
+  '@react-spring/types@10.1.0':
+    resolution: {integrity: sha512-RkJAlkAZ5yZSRBMOSidamioBHLjf8wGKbtr3pZ5iKoHFNQuNM2k6DqJDIEUcNQlWRZXny6Eqys2c9NdugdbdyQ==}
+
+  '@react-spring/web@10.1.0':
+    resolution: {integrity: sha512-mIj/lJ+1eI4tLSkIloaSNjmuriTDZY9bbQ/GFGcbVGfOKzWb5JOMMKiuHACh8J3m0+se3KqcWdg/JoALVloE7g==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
   '@rolldown/pluginutils@1.0.0-beta.27':
     resolution: {integrity: sha512-+d0F4MKMCbeVUJwG96uQ4SgAznZNSq93I3V+9NHA4OpvqG8mRCpGdKmK8l/dl02h2CCDHwW2FqilnTyDcAnqjA==}
@@ -4094,6 +4124,39 @@ snapshots:
 
   '@react-dnd/shallowequal@4.0.2': {}
 
+  '@react-spring/animated@10.1.0(react@18.3.1)':
+    dependencies:
+      '@react-spring/shared': 10.1.0(react@18.3.1)
+      '@react-spring/types': 10.1.0
+      react: 18.3.1
+
+  '@react-spring/core@10.1.0(react@18.3.1)':
+    dependencies:
+      '@react-spring/animated': 10.1.0(react@18.3.1)
+      '@react-spring/shared': 10.1.0(react@18.3.1)
+      '@react-spring/types': 10.1.0
+      react: 18.3.1
+
+  '@react-spring/rafz@10.1.0': {}
+
+  '@react-spring/shared@10.1.0(react@18.3.1)':
+    dependencies:
+      '@react-spring/rafz': 10.1.0
+      '@react-spring/types': 10.1.0
+      react: 18.3.1
+
+  '@react-spring/types@10.1.0': {}
+
+  '@react-spring/web@10.1.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+    dependencies:
+      '@react-spring/animated': 10.1.0(react@18.3.1)
+      '@react-spring/core': 10.1.0(react@18.3.1)
+      '@react-spring/shared': 10.1.0(react@18.3.1)
+      '@react-spring/types': 10.1.0
+      csstype: 3.2.3
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+
   '@rolldown/pluginutils@1.0.0-beta.27': {}
 
   '@rollup/rollup-android-arm-eabi@4.60.4':
@@ -4901,10 +4964,12 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.15
 
-  react-tinder-card@1.6.4(react@18.3.1):
+  react-tinder-card@1.6.4(@react-spring/web@10.1.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1):
     dependencies:
       p-sleep: 1.1.0
       react: 18.3.1
+    optionalDependencies:
+      '@react-spring/web': 10.1.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
   react-transition-group@4.4.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
