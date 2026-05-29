@@ -9,14 +9,37 @@ import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
 
 const ALL_TAGS = [
-  '#gaming', '#cooking', '#indierock', '#scifi', '#fitness', '#art',
-  '#travel', '#movies', '#books', '#music', '#tech', '#outdoors',
-  '#photography', '#fashion', '#anime', '#sports', '#coffee', '#yoga',
+  // Tech & Dev
+  '#coding', '#webdev', '#python', '#javascript', '#typescript', '#linux', '#openSource',
+  '#AI', '#machinelearning', '#gamedev', '#blockchain', '#crypto', '#startups', '#ux', '#design',
+  // Gaming & Anime
+  '#gaming', '#anime', '#manga', '#rpg', '#esports',
+  // Music
+  '#music', '#indierock', '#hiphop', '#jazz', '#kpop', '#classical', '#edm', '#metal',
+  // Arts & Culture
+  '#art', '#photography', '#writing', '#poetry', '#theatre', '#painting', '#streetart',
+  // Film & TV
+  '#movies', '#scifi', '#horror', '#documentary', '#netflix', '#filmmaking',
+  // Books & Mind
+  '#books', '#philosophy', '#history', '#psychology', '#science', '#politics', '#astrology',
+  // Fitness & Outdoors
+  '#fitness', '#hiking', '#cycling', '#running', '#yoga', '#swimming', '#climbing',
+  // Food & Lifestyle
+  '#cooking', '#foodie', '#coffee', '#vegan', '#travel', '#camping', '#nightlife', '#minimalism',
+  // Misc
+  '#fashion', '#sneakers', '#streetwear', '#tattoos', '#sports', '#outdoors', '#meditation', '#spirituality',
 ]
 
 function randomSeed() {
   return Math.random().toString(36).slice(2, 10)
 }
+
+const AVATAR_STYLES = [
+  { key: 'avataaars', label: 'Character' },
+  { key: 'personas', label: 'Persona' },
+  { key: 'lorelei', label: 'Lorelei' },
+  { key: 'notionists', label: 'Notion' },
+]
 
 export function OnboardingPage() {
   const { user, refreshProfile } = useAuth()
@@ -28,6 +51,7 @@ export function OnboardingPage() {
   const [usernameError, setUsernameError] = useState('')
   const [usernameChecking, setUsernameChecking] = useState(false)
   const [avatarSeed, setAvatarSeed] = useState(randomSeed())
+  const [avatarStyle, setAvatarStyle] = useState('avataaars')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [bio, setBio] = useState('')
   const [locationLoading, setLocationLoading] = useState(false)
@@ -44,7 +68,8 @@ export function OnboardingPage() {
   const muted = dark ? '#A6A4C5' : '#7B78A8'
   const inputBg = dark ? 'rgba(28,18,54,0.5)' : '#F3F0FC'
 
-  const avatarUrl = `https://api.dicebear.com/7.x/shapes/svg?seed=${avatarSeed}&backgroundColor=b6e3f4,c0aede,d1d4f9&size=128`
+  const bgColor = avatarStyle === 'avataaars' ? 'b6e3f4,c0aede,d1d4f9,ffd5dc' : 'b6e3f4,c0aede,d1d4f9'
+  const avatarUrl = `https://api.dicebear.com/7.x/${avatarStyle}/svg?seed=${avatarSeed}&backgroundColor=${bgColor}&size=128`
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout>
@@ -122,9 +147,7 @@ export function OnboardingPage() {
         }}
       />
 
-      <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
-        className="relative z-20 w-full max-w-lg mx-4">
-        
+      <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="relative z-20 w-full max-w-lg mx-4">
         <div className="rounded-3xl p-8"
           style={{ background: cardBg, border: `1px solid ${border}`, backdropFilter: 'blur(24px)', boxShadow: '0 24px 64px rgba(92,49,242,0.12)' }}>
 
@@ -177,15 +200,32 @@ export function OnboardingPage() {
             )}
 
             {step === 1 && (
-              <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex flex-col items-center gap-6">
+              <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex flex-col items-center gap-5">
                 <div>
                   <h2 style={{ fontFamily: "'Clash Display', sans-serif", fontSize: '1.6rem', fontWeight: 700, color: text, textAlign: 'center' }}>Your avatar</h2>
-                  <p style={{ color: muted, fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '0.875rem', textAlign: 'center', marginTop: '0.5rem' }}>An abstract shape that represents you — no face required.</p>
+                  <p style={{ color: muted, fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '0.875rem', textAlign: 'center', marginTop: '0.5rem' }}>Pick a style, then randomize until something clicks.</p>
                 </div>
-                <div className="w-40 h-40 rounded-3xl overflow-hidden"
-                  style={{ border: `3px solid ${border}`, boxShadow: '0 12px 32px rgba(92,49,242,0.2)' }}>
+
+                <div className="w-36 h-36 rounded-3xl overflow-hidden"
+                  style={{ border: `3px solid ${border}`, boxShadow: '0 12px 32px rgba(92,49,242,0.2)', background: '#E3DCF8' }}>
                   <img src={avatarUrl} alt="Avatar" className="w-full h-full" />
                 </div>
+
+                <div className="flex gap-2 flex-wrap justify-center">
+                  {AVATAR_STYLES.map((s) => (
+                    <button key={s.key} onClick={() => { setAvatarStyle(s.key); setAvatarSeed(randomSeed()) }}
+                      className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
+                      style={{
+                        background: avatarStyle === s.key ? 'linear-gradient(135deg,#5C31F2,#7C3AED)' : inputBg,
+                        color: avatarStyle === s.key ? '#fff' : muted,
+                        border: `1px solid ${avatarStyle === s.key ? '#5C31F2' : border}`,
+                        fontFamily: "'Plus Jakarta Sans', sans-serif",
+                      }}>
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
+
                 <button onClick={() => setAvatarSeed(randomSeed())}
                   className="flex items-center gap-2 px-6 py-3 rounded-2xl font-semibold"
                   style={{ background: 'linear-gradient(135deg, #5C31F2, #7C3AED)', color: '#fff', fontFamily: "'Plus Jakarta Sans', sans-serif", boxShadow: '0 4px 16px rgba(92,49,242,0.4)' }}>
@@ -199,9 +239,9 @@ export function OnboardingPage() {
               <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="flex flex-col gap-4">
                 <div>
                   <h2 style={{ fontFamily: "'Clash Display', sans-serif", fontSize: '1.6rem', fontWeight: 700, color: text }}>Your vibe tags</h2>
-                  <p style={{ color: muted, fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '0.875rem', marginTop: '0.25rem' }}>Pick 3–7 tags that describe you. These drive matching.</p>
+                  <p style={{ color: muted, fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '0.875rem', marginTop: '0.25rem' }}>Pick 3–7 tags. These drive your matches.</p>
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 max-h-64 overflow-y-auto pr-1" style={{ scrollbarWidth: 'thin' }}>
                   {ALL_TAGS.map((tag) => {
                     const selected = selectedTags.includes(tag)
                     return (
@@ -213,6 +253,7 @@ export function OnboardingPage() {
                           border: `1px solid ${selected ? '#5C31F2' : border}`,
                           fontFamily: "'Plus Jakarta Sans', sans-serif",
                           transform: selected ? 'scale(1.04)' : 'scale(1)',
+                          flexShrink: 0,
                         }}>
                         {tag}
                       </button>
@@ -234,7 +275,7 @@ export function OnboardingPage() {
                 {!locationData ? (
                   <button onClick={captureLocation} disabled={locationLoading}
                     className="flex items-center justify-center gap-2 py-3 rounded-xl font-semibold"
-                    style={{ background: 'linear-gradient(135deg,#5C31F2,#7C3AED)', color: '#fff', fontFamily: "'Plus Jakarta Sans', sans-serif", boxShadow: '0 4px 16px rgba(92,49,242,0.4)' }}>
+                    style={{ background: 'linear-gradient(135deg,#5C31F2,#7C3AED)', color: '#fff', fontFamily: "'Plus Jakarta Sans', sans-serif", boxShadow: '0 4px 16px rgba(92,49,242,0.4)', border: 'none', cursor: 'pointer' }}>
                     <MapPin size={16} />
                     {locationLoading ? 'Detecting…' : 'Enable Location'}
                   </button>
@@ -257,7 +298,7 @@ export function OnboardingPage() {
             {step > 0 && (
               <button onClick={() => setStep((s) => s - 1)}
                 className="px-5 py-3 rounded-xl font-semibold"
-                style={{ background: inputBg, border: `1px solid ${border}`, color: muted, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                style={{ background: inputBg, border: `1px solid ${border}`, color: muted, fontFamily: "'Plus Jakarta Sans', sans-serif", cursor: 'pointer' }}>
                 Back
               </button>
             )}
@@ -269,6 +310,7 @@ export function OnboardingPage() {
                 background: (!canNext && step < 3) || saving ? muted : 'linear-gradient(135deg,#5C31F2,#7C3AED)',
                 color: '#fff', fontFamily: "'Plus Jakarta Sans', sans-serif",
                 boxShadow: (!canNext && step < 3) || saving ? 'none' : '0 4px 16px rgba(92,49,242,0.4)',
+                border: 'none', cursor: ((!canNext && step < 3) || saving) ? 'not-allowed' : 'pointer',
               }}>
               {step === 3 ? (saving ? 'Saving…' : 'Enter ZED') : <>Next <ChevronRight size={16} /></>}
             </button>

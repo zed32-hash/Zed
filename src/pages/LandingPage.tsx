@@ -2,8 +2,11 @@ import { useNavigate } from 'react-router'
 import { Navbar } from '../app/components/Navbar'
 import { Hero } from '../app/components/Hero'
 import { Marquee } from '../app/components/Marquee'
+import { About } from '../app/components/About'
+import { Features } from '../app/components/Features'
 import { HowItWorks } from '../app/components/HowItWorks'
 import { HappyHour } from '../app/components/HappyHour'
+import { Waitlist } from '../app/components/Waitlist'
 import { Footer } from '../app/components/Footer'
 import { useTheme } from '../contexts/ThemeContext'
 import { useAuth } from '../contexts/AuthContext'
@@ -22,8 +25,13 @@ export function LandingPage() {
       />
       <Hero dark={dark} onLaunchApp={() => navigate(user ? '/app' : '/signup')} />
       <Marquee dark={dark} />
-      <HowItWorks dark={dark} />
+      <About dark={dark} />
+      <Features dark={dark} />
+      <div id="how-it-works">
+        <HowItWorks dark={dark} />
+      </div>
       <HappyHour dark={dark} />
+      <Waitlist dark={dark} />
       <Footer dark={dark} />
     </div>
   )

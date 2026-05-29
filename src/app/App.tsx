@@ -8,6 +8,10 @@ import { OnboardingPage } from '../pages/OnboardingPage'
 import { DiscoveryPage } from '../pages/DiscoveryPage'
 import { InboxPage } from '../pages/InboxPage'
 import { ChatPage } from '../pages/ChatPage'
+import { AdminPage } from '../pages/AdminPage'
+import { ManifestoPage } from '../pages/ManifestoPage'
+import { PrivacyPage } from '../pages/PrivacyPage'
+import { TermsPage } from '../pages/TermsPage'
 
 export default function App() {
   return (
@@ -18,6 +22,10 @@ export default function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/onboarding" element={<OnboardingPage />} />
+            <Route path="/manifesto" element={<ManifestoPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/terms" element={<TermsPage />} />
+            <Route path="/admin" element={<AdminPage />} />
             <Route
               path="/app"
               element={
