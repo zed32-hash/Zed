@@ -53,11 +53,11 @@ export function Footer({ dark }: FooterProps) {
                 onMouseLeave={(e) => (e.currentTarget.style.color = muted)}>
                 <Phone size={14} /> +1 (579) 471-3458
               </a>
-              <a href="mailto:support@zed.app" className="flex items-center gap-2"
+              <a href="mailto:officialzed@zohomail.com" className="flex items-center gap-2"
                 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '0.875rem', color: muted, textDecoration: 'none', transition: 'color 0.2s' }}
                 onMouseEnter={(e) => (e.currentTarget.style.color = text)}
                 onMouseLeave={(e) => (e.currentTarget.style.color = muted)}>
-                <Mail size={14} /> support@zed.app
+                <Mail size={14} /> officialzed@zohomail.com
               </a>
             </div>
           </div>
