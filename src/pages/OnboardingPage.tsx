@@ -128,7 +128,7 @@ export function OnboardingPage() {
         status: 'active',
       })
       await refreshProfile()
-      navigate('/app')
+      navigate('/rooms')
     } catch (err) {
       console.error(err)
     } finally {

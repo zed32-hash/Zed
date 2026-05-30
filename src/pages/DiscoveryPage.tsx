@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router'
 import { motion, AnimatePresence } from 'motion/react'
-import { Heart, X, Search, MapPin, Tags, Ghost, MessageCircle, Zap } from 'lucide-react'
+import { Heart, X, Search, MapPin, Tags, Ghost, Zap, ChevronRight } from 'lucide-react'
 import {
   collection, query, where, getDocs, doc, setDoc, serverTimestamp,
   getDoc,
@@ -53,6 +53,7 @@ export function DiscoveryPage() {
   const [matchState, setMatchState] = useState<MatchState | null>(null)
   const [vibesProfile, setVibesProfile] = useState<Profile | null>(null)
   const [vibesDismissed, setVibesDismissed] = useState(false)
+  const [profileModal, setProfileModal] = useState<Profile | null>(null)
   const cardRefs = useRef<any[]>([])
 
   const bg = dark
@@ -243,14 +244,19 @@ export function DiscoveryPage() {
 
         {searchResult && (
           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-            className="mb-4 p-4 rounded-2xl flex items-center gap-3"
-            style={{ background: cardBg, border: `1px solid ${border}`, backdropFilter: 'blur(12px)' }}>
-            <img src={searchResult.avatarUrl} alt="" className="w-12 h-12 rounded-xl" style={{ border: `2px solid ${border}` }} />
-            <div className="flex-1">
+            className="mb-4 p-4 rounded-2xl flex items-center gap-3 cursor-pointer"
+            onClick={() => setProfileModal(searchResult)}
+            style={{ background: cardBg, border: `1px solid ${border}`, backdropFilter: 'blur(12px)', boxShadow: '0 4px 20px rgba(92,49,242,0.1)' }}>
+            <img src={searchResult.avatarUrl} alt="" className="w-12 h-12 rounded-xl" style={{ border: `2px solid ${border}`, background: '#E3DCF8' }} />
+            <div className="flex-1 min-w-0">
               <p style={{ fontWeight: 700, color: text, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>@{searchResult.username}</p>
-              <p style={{ color: muted, fontSize: '0.75rem', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{searchResult.tags.join(' ')}</p>
+              <p style={{ color: muted, fontSize: '0.75rem', fontFamily: "'Plus Jakarta Sans', sans-serif" }} className="truncate">{searchResult.tags.slice(0, 4).join(' ')}</p>
             </div>
-            <button onClick={() => { setSearchResult(null); setSearchQuery('') }} style={{ color: muted }}><X size={16} /></button>
+            <div className="flex items-center gap-2">
+              <span style={{ color: '#5C31F2', fontSize: '0.72rem', fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 600 }}>View profile</span>
+              <ChevronRight size={14} style={{ color: '#5C31F2' }} />
+              <button onClick={(e) => { e.stopPropagation(); setSearchResult(null); setSearchQuery('') }} style={{ color: muted }}><X size={16} /></button>
+            </div>
           </motion.div>
         )}
         {searchError && <p className="text-sm mb-3" style={{ color: '#FF5353', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{searchError}</p>}
@@ -351,21 +357,16 @@ export function DiscoveryPage() {
         </div>
 
         {!loading && currentIndex >= 0 && profiles.length > 0 && (
-          <div className="flex items-center justify-center gap-6 mt-4">
+          <div className="flex items-center justify-center gap-8 mt-4">
             <button onClick={swipeLeft}
               className="w-14 h-14 rounded-full flex items-center justify-center transition-all active:scale-90"
               style={{ background: dark ? 'rgba(255,83,83,0.12)' : 'rgba(255,83,83,0.08)', border: '2px solid rgba(255,83,83,0.25)', color: '#FF5353', boxShadow: '0 4px 16px rgba(255,83,83,0.15)' }}>
               <X size={22} />
             </button>
-            <button onClick={() => navigate('/inbox')}
-              className="w-10 h-10 rounded-full flex items-center justify-center transition-all"
-              style={{ background: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)', border: `1px solid ${border}`, color: muted }}>
-              <MessageCircle size={16} />
-            </button>
             <button onClick={swipeRight}
-              className="w-14 h-14 rounded-full flex items-center justify-center transition-all active:scale-90"
+              className="w-16 h-16 rounded-full flex items-center justify-center transition-all active:scale-90"
               style={{ background: 'linear-gradient(135deg,#5C31F2,#7C3AED)', border: 'none', color: '#fff', boxShadow: '0 4px 20px rgba(92,49,242,0.4)' }}>
-              <Heart size={22} fill="#fff" />
+              <Heart size={24} fill="#fff" />
             </button>
           </div>
         )}
@@ -442,6 +443,94 @@ export function DiscoveryPage() {
                 style={{ background: 'linear-gradient(135deg,#5C31F2,#7C3AED)', color: '#fff', fontFamily: "'Plus Jakarta Sans', sans-serif", boxShadow: '0 8px 24px rgba(92,49,242,0.5)' }}>
                 Start Chatting →
               </motion.button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Profile detail modal */}
+      <AnimatePresence>
+        {profileModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-end justify-center p-4"
+            style={{ background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(10px)' }}
+            onClick={(e) => e.target === e.currentTarget && setProfileModal(null)}>
+            <motion.div
+              initial={{ y: 80, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 80, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 280, damping: 28 }}
+              className="w-full max-w-md rounded-3xl overflow-hidden"
+              style={{ background: dark ? '#1C1236' : '#FBF9F4', border: `1px solid ${border}`, boxShadow: '0 24px 60px rgba(0,0,0,0.3)' }}>
+
+              {/* Avatar banner */}
+              <div className="relative h-40 flex items-center justify-center"
+                style={{ background: dark ? 'rgba(92,49,242,0.12)' : 'rgba(92,49,242,0.07)' }}>
+                <img src={profileModal.avatarUrl} alt="" className="h-32 w-32 object-cover rounded-2xl"
+                  style={{ border: `3px solid ${border}`, background: '#E3DCF8', boxShadow: '0 8px 24px rgba(92,49,242,0.2)' }} />
+                <button onClick={() => setProfileModal(null)}
+                  className="absolute top-4 right-4 w-8 h-8 rounded-xl flex items-center justify-center"
+                  style={{ background: dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)', color: muted }}>
+                  <X size={15} />
+                </button>
+              </div>
+
+              <div className="p-5">
+                <h2 style={{ fontFamily: "'Clash Display', sans-serif", fontWeight: 800, fontSize: '1.4rem', color: text, marginBottom: '0.25rem' }}>
+                  @{profileModal.username}
+                </h2>
+
+                {profileModal.bio && (
+                  <p style={{ color: muted, fontSize: '0.85rem', fontFamily: "'Plus Jakarta Sans', sans-serif", lineHeight: 1.6, marginBottom: '1rem' }}>
+                    {profileModal.bio}
+                  </p>
+                )}
+
+                {/* Tags */}
+                <div className="flex flex-wrap gap-1.5 mb-4">
+                  {profileModal.tags.map((tag) => {
+                    const shared = profile?.tags.includes(tag)
+                    return (
+                      <span key={tag} className="px-2.5 py-1 rounded-full text-xs font-semibold"
+                        style={{ background: shared ? 'rgba(92,49,242,0.15)' : (dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'), color: shared ? '#5C31F2' : muted, border: `1px solid ${shared ? 'rgba(92,49,242,0.3)' : border}`, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                        {tag} {shared ? '✓' : ''}
+                      </span>
+                    )
+                  })}
+                </div>
+
+                {/* Compatibility */}
+                {(() => {
+                  const shared = (profile?.tags || []).filter(t => profileModal.tags.includes(t))
+                  return shared.length > 0 ? (
+                    <div className="mb-4 px-3 py-2 rounded-xl"
+                      style={{ background: dark ? 'rgba(92,49,242,0.08)' : 'rgba(92,49,242,0.05)', border: `1px solid rgba(92,49,242,0.15)` }}>
+                      <p style={{ fontSize: '0.78rem', color: '#5C31F2', fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 600 }}>
+                        ✨ {shared.length} shared interest{shared.length > 1 ? 's' : ''}: {shared.join(', ')}
+                      </p>
+                    </div>
+                  ) : null
+                })()}
+
+                {/* Actions */}
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => { setProfileModal(null); handleSwipe('pass', profileModal.uid) }}
+                    className="flex-1 py-3 rounded-2xl font-semibold flex items-center justify-center gap-2"
+                    style={{ background: dark ? 'rgba(255,83,83,0.1)' : 'rgba(255,83,83,0.08)', border: '1.5px solid rgba(255,83,83,0.25)', color: '#FF5353', fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '0.875rem' }}>
+                    <X size={16} /> Pass
+                  </button>
+                  <button
+                    onClick={() => { setProfileModal(null); handleSwipe('right', profileModal.uid) }}
+                    className="flex-1 py-3 rounded-2xl font-semibold flex items-center justify-center gap-2"
+                    style={{ background: 'linear-gradient(135deg,#5C31F2,#7C3AED)', color: '#fff', fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '0.875rem', boxShadow: '0 4px 16px rgba(92,49,242,0.4)' }}>
+                    <Heart size={16} fill="#fff" /> Like
+                  </button>
+                </div>
+              </div>
             </motion.div>
           </motion.div>
         )}
