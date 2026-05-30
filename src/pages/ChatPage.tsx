@@ -233,7 +233,12 @@ export function ChatPage() {
         if (currentCount >= 20) throw new Error('DAILY_LIMIT')
         const msgRef = doc(collection(db, 'chats', chatId, 'messages'))
         tx.set(msgRef, { senderId: user.uid, text: messageText, timestamp: serverTimestamp(), reactions: {} })
-        tx.update(doc(db, 'chats', chatId), { messageCount: increment(1), lastMessageTimestamp: serverTimestamp() })
+        tx.update(doc(db, 'chats', chatId), {
+          messageCount: increment(1),
+          lastMessageTimestamp: serverTimestamp(),
+          lastMessageSenderId: user.uid,
+          lastMessagePreview: messageText.slice(0, 80),
+        })
         tx.update(userRef, { dailyMessageCount: currentCount + 1, lastMessageReset: midnight })
       })
       await refreshProfile()

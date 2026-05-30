@@ -1,7 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router'
+import { Toaster } from 'sonner'
 import { AuthProvider } from '../contexts/AuthContext'
 import { ThemeProvider } from '../contexts/ThemeContext'
 import { ProtectedRoute } from '../components/app/ProtectedRoute'
+import { MessageNotifications } from '../components/app/MessageNotifications'
 import { LandingPage } from '../pages/LandingPage'
 import { SignupPage } from '../pages/SignupPage'
 import { OnboardingPage } from '../pages/OnboardingPage'
@@ -19,6 +21,7 @@ export default function App() {
     <BrowserRouter>
       <ThemeProvider>
         <AuthProvider>
+          <MessageNotifications />
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/signup" element={<SignupPage />} />
@@ -33,6 +36,10 @@ export default function App() {
             <Route path="/chat/:chatId" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          <Toaster
+            position="top-center"
+            toastOptions={{ unstyled: true }}
+          />
         </AuthProvider>
       </ThemeProvider>
     </BrowserRouter>
