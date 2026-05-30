@@ -1,0 +1,367 @@
+Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'htiResults')
+    at Ic.onHeadersReceived (background.js:23:182469)
+iframe_block_page.html:1 [Intervention] Slow network is detected. See https://www.chromestatus.com/feature/5636954674692096 for more details. Fallback font will be used while loading: chrome-extension://fdhgeoginicibhagdmblfikbgbkahibd/fonts/Poppins-Regular.ttf
+index-CcM2uhny.js:3614 Uncaught (in promise) FirebaseError: Missing or insufficient permissions.
+Promise.then
+Pc @ index-CcM2uhny.js:3115
+enqueue @ index-CcM2uhny.js:3115
+enqueueAndForget @ index-CcM2uhny.js:3115
+(anonymous) @ index-CcM2uhny.js:2856
+(anonymous) @ index-CcM2uhny.js:2856
+o_ @ index-CcM2uhny.js:2781
+(anonymous) @ index-CcM2uhny.js:2796
+(anonymous) @ index-CcM2uhny.js:2796
+Pt @ index-CcM2uhny.js:1565
+ft @ index-CcM2uhny.js:1565
+Ki.qa @ index-CcM2uhny.js:1573
+Ee @ index-CcM2uhny.js:1570
+on.Y @ index-CcM2uhny.js:1569
+on.ba @ index-CcM2uhny.js:1569
+Pt @ index-CcM2uhny.js:1565
+ft @ index-CcM2uhny.js:1565
+hi @ index-CcM2uhny.js:1572
+t.Xa @ index-CcM2uhny.js:1572
+t.Ca @ index-CcM2uhny.js:1572
+ms @ index-CcM2uhny.js:1571
+t.Ma @ index-CcM2uhny.js:1570
+Promise.then
+Sc @ index-CcM2uhny.js:1570
+t.Ma @ index-CcM2uhny.js:1570
+Promise.then
+Sc @ index-CcM2uhny.js:1570
+t.Ma @ index-CcM2uhny.js:1570
+Promise.then
+Sc @ index-CcM2uhny.js:1570
+t.Ma @ index-CcM2uhny.js:1570
+Promise.then
+Sc @ index-CcM2uhny.js:1570
+t.Ma @ index-CcM2uhny.js:1570
+Promise.then
+Sc @ index-CcM2uhny.js:1570
+t.Ma @ index-CcM2uhny.js:1570
+Promise.then
+Sc @ index-CcM2uhny.js:1570
+t.Ma @ index-CcM2uhny.js:1570
+Promise.then
+Sc @ index-CcM2uhny.js:1570
+t.Ma @ index-CcM2uhny.js:1570
+Promise.then
+Sc @ index-CcM2uhny.js:1570
+t.Pa @ index-CcM2uhny.js:1570
+Promise.then
+t.send @ index-CcM2uhny.js:1570
+t.ea @ index-CcM2uhny.js:1572
+S @ index-CcM2uhny.js:1569
+Gi @ index-CcM2uhny.js:1573
+t.Da @ index-CcM2uhny.js:1573
+k @ index-CcM2uhny.js:1565
+Promise.then
+j @ index-CcM2uhny.js:1565
+er @ index-CcM2uhny.js:1573
+Ee @ index-CcM2uhny.js:1570
+on.Y @ index-CcM2uhny.js:1569
+on.ba @ index-CcM2uhny.js:1569
+Pt @ index-CcM2uhny.js:1565
+ft @ index-CcM2uhny.js:1565
+hi @ index-CcM2uhny.js:1572
+t.Xa @ index-CcM2uhny.js:1572
+t.Ca @ index-CcM2uhny.js:1572
+ms @ index-CcM2uhny.js:1571
+t.Ma @ index-CcM2uhny.js:1570
+Promise.then
+Sc @ index-CcM2uhny.js:1570
+t.Pa @ index-CcM2uhny.js:1570
+Promise.then
+t.send @ index-CcM2uhny.js:1570
+t.ea @ index-CcM2uhny.js:1572
+S @ index-CcM2uhny.js:1569
+Xn @ index-CcM2uhny.js:1569
+t.Ea @ index-CcM2uhny.js:1573
+k @ index-CcM2uhny.js:1565
+Promise.then
+j @ index-CcM2uhny.js:1565
+fi @ index-CcM2uhny.js:1573
+t.connect @ index-CcM2uhny.js:1573
+Bn.m @ index-CcM2uhny.js:1573
+jo @ index-CcM2uhny.js:2796
+send @ index-CcM2uhny.js:2781
+k_ @ index-CcM2uhny.js:2856
+H_ @ index-CcM2uhny.js:2856
+xy @ index-CcM2uhny.js:2887
+(anonymous) @ index-CcM2uhny.js:2887
+dD @ index-CcM2uhny.js:2887
+(anonymous) @ index-CcM2uhny.js:2856
+(anonymous) @ index-CcM2uhny.js:2856
+(anonymous) @ index-CcM2uhny.js:3115
+(anonymous) @ index-CcM2uhny.js:3115
+Promise.then
+Pc @ index-CcM2uhny.js:3115
+enqueue @ index-CcM2uhny.js:3115
+enqueueAndForget @ index-CcM2uhny.js:3115
+(anonymous) @ index-CcM2uhny.js:2856
+(anonymous) @ index-CcM2uhny.js:2856
+i_ @ index-CcM2uhny.js:2781
+(anonymous) @ index-CcM2uhny.js:2796
+setTimeout
+P_ @ index-CcM2uhny.js:2796
+z_ @ index-CcM2uhny.js:2856
+Q_ @ index-CcM2uhny.js:2856
+(anonymous) @ index-CcM2uhny.js:2856
+Promise.then
+auth @ index-CcM2uhny.js:2856
+start @ index-CcM2uhny.js:2856
+Ey @ index-CcM2uhny.js:2887
+VS @ index-CcM2uhny.js:2887
+$S @ index-CcM2uhny.js:2965
+await in $S
+PD @ index-CcM2uhny.js:2965
+Cy @ index-CcM2uhny.js:2950
+(anonymous) @ index-CcM2uhny.js:3040
+await in (anonymous)
+(anonymous) @ index-CcM2uhny.js:3115
+(anonymous) @ index-CcM2uhny.js:3115
+Promise.then
+Pc @ index-CcM2uhny.js:3115
+enqueue @ index-CcM2uhny.js:3115
+enqueueAndForget @ index-CcM2uhny.js:3115
+QD @ index-CcM2uhny.js:3040
+_a @ index-CcM2uhny.js:3356
+(anonymous) @ index-CcM2uhny.js:3614
+ah @ index-CcM2uhny.js:40
+tl @ index-CcM2uhny.js:40
+(anonymous) @ index-CcM2uhny.js:40
+j @ index-CcM2uhny.js:25
+U @ index-CcM2uhny.js:25
+postMessage
+L @ index-CcM2uhny.js:25
+U @ index-CcM2uhny.js:25
+postMessage
+L @ index-CcM2uhny.js:25
+U @ index-CcM2uhny.js:25
+postMessage
+L @ index-CcM2uhny.js:25
+U @ index-CcM2uhny.js:25
+postMessage
+L @ index-CcM2uhny.js:25
+U @ index-CcM2uhny.js:25
+postMessage
+L @ index-CcM2uhny.js:25
+ne @ index-CcM2uhny.js:25
+t.unstable_scheduleCallback @ index-CcM2uhny.js:25
+D1 @ index-CcM2uhny.js:40
+Ar @ index-CcM2uhny.js:40
+xs @ index-CcM2uhny.js:40
+BC @ index-CcM2uhny.js:38
+(anonymous) @ index-CcM2uhny.js:51
+Tt.startTransition @ index-CcM2uhny.js:9
+(anonymous) @ index-CcM2uhny.js:51
+x @ index-CcM2uhny.js:49
+(anonymous) @ index-CcM2uhny.js:49
+A @ index-CcM2uhny.js:3614
+await in A
+Ui @ index-CcM2uhny.js:37
+$i @ index-CcM2uhny.js:37
+ui @ index-CcM2uhny.js:37
+Z0 @ index-CcM2uhny.js:37
+ev @ index-CcM2uhny.js:37
+(anonymous) @ index-CcM2uhny.js:37
+Ap @ index-CcM2uhny.js:40
+Bi @ index-CcM2uhny.js:37
+Af @ index-CcM2uhny.js:37
+zl @ index-CcM2uhny.js:37
+js @ index-CcM2uhny.js:37
+index-CcM2uhny.js:276 [2026-05-30T12:40:30.426Z]  @firebase/firestore: Firestore (12.14.0): Uncaught Error in snapshot listener: FirebaseError: [code=permission-denied]: Missing or insufficient permissions.
+jk @ index-CcM2uhny.js:276
+error @ index-CcM2uhny.js:276
+Fi @ index-CcM2uhny.js:1633
+error @ index-CcM2uhny.js:2995
+onError @ index-CcM2uhny.js:2950
+bD @ index-CcM2uhny.js:2950
+lg @ index-CcM2uhny.js:2965
+(anonymous) @ index-CcM2uhny.js:2965
+Promise.then
+MD @ index-CcM2uhny.js:2965
+(anonymous) @ index-CcM2uhny.js:2887
+pD @ index-CcM2uhny.js:2887
+onNext @ index-CcM2uhny.js:2856
+(anonymous) @ index-CcM2uhny.js:2856
+(anonymous) @ index-CcM2uhny.js:2856
+(anonymous) @ index-CcM2uhny.js:3115
+(anonymous) @ index-CcM2uhny.js:3115
+Promise.then
+Pc @ index-CcM2uhny.js:3115
+enqueue @ index-CcM2uhny.js:3115
+enqueueAndForget @ index-CcM2uhny.js:3115
+(anonymous) @ index-CcM2uhny.js:2856
+(anonymous) @ index-CcM2uhny.js:2856
+o_ @ index-CcM2uhny.js:2781
+(anonymous) @ index-CcM2uhny.js:2796
+(anonymous) @ index-CcM2uhny.js:2796
+Pt @ index-CcM2uhny.js:1565
+ft @ index-CcM2uhny.js:1565
+Ki.qa @ index-CcM2uhny.js:1573
+Ee @ index-CcM2uhny.js:1570
+on.Y @ index-CcM2uhny.js:1569
+on.ba @ index-CcM2uhny.js:1569
+Pt @ index-CcM2uhny.js:1565
+ft @ index-CcM2uhny.js:1565
+hi @ index-CcM2uhny.js:1572
+t.Xa @ index-CcM2uhny.js:1572
+t.Ca @ index-CcM2uhny.js:1572
+ms @ index-CcM2uhny.js:1571
+t.Ma @ index-CcM2uhny.js:1570
+Promise.then
+Sc @ index-CcM2uhny.js:1570
+t.Ma @ index-CcM2uhny.js:1570
+Promise.then
+Sc @ index-CcM2uhny.js:1570
+t.Ma @ index-CcM2uhny.js:1570
+Promise.then
+Sc @ index-CcM2uhny.js:1570
+t.Ma @ index-CcM2uhny.js:1570
+Promise.then
+Sc @ index-CcM2uhny.js:1570
+t.Ma @ index-CcM2uhny.js:1570
+Promise.then
+Sc @ index-CcM2uhny.js:1570
+t.Ma @ index-CcM2uhny.js:1570
+Promise.then
+Sc @ index-CcM2uhny.js:1570
+t.Ma @ index-CcM2uhny.js:1570
+Promise.then
+Sc @ index-CcM2uhny.js:1570
+t.Ma @ index-CcM2uhny.js:1570
+Promise.then
+Sc @ index-CcM2uhny.js:1570
+t.Ma @ index-CcM2uhny.js:1570
+Promise.then
+Sc @ index-CcM2uhny.js:1570
+t.Ma @ index-CcM2uhny.js:1570
+Promise.then
+Sc @ index-CcM2uhny.js:1570
+t.Ma @ index-CcM2uhny.js:1570
+Promise.then
+Sc @ index-CcM2uhny.js:1570
+t.Pa @ index-CcM2uhny.js:1570
+Promise.then
+t.send @ index-CcM2uhny.js:1570
+t.ea @ index-CcM2uhny.js:1572
+S @ index-CcM2uhny.js:1569
+Gi @ index-CcM2uhny.js:1573
+t.Da @ index-CcM2uhny.js:1573
+k @ index-CcM2uhny.js:1565
+Promise.then
+j @ index-CcM2uhny.js:1565
+er @ index-CcM2uhny.js:1573
+Ee @ index-CcM2uhny.js:1570
+on.Y @ index-CcM2uhny.js:1569
+on.ba @ index-CcM2uhny.js:1569
+Pt @ index-CcM2uhny.js:1565
+ft @ index-CcM2uhny.js:1565
+hi @ index-CcM2uhny.js:1572
+t.Xa @ index-CcM2uhny.js:1572
+t.Ca @ index-CcM2uhny.js:1572
+ms @ index-CcM2uhny.js:1571
+t.Ma @ index-CcM2uhny.js:1570
+Promise.then
+Sc @ index-CcM2uhny.js:1570
+t.Pa @ index-CcM2uhny.js:1570
+Promise.then
+t.send @ index-CcM2uhny.js:1570
+t.ea @ index-CcM2uhny.js:1572
+S @ index-CcM2uhny.js:1569
+Xn @ index-CcM2uhny.js:1569
+t.Ea @ index-CcM2uhny.js:1573
+k @ index-CcM2uhny.js:1565
+Promise.then
+j @ index-CcM2uhny.js:1565
+fi @ index-CcM2uhny.js:1573
+t.connect @ index-CcM2uhny.js:1573
+Bn.m @ index-CcM2uhny.js:1573
+jo @ index-CcM2uhny.js:2796
+send @ index-CcM2uhny.js:2781
+k_ @ index-CcM2uhny.js:2856
+H_ @ index-CcM2uhny.js:2856
+xy @ index-CcM2uhny.js:2887
+(anonymous) @ index-CcM2uhny.js:2887
+dD @ index-CcM2uhny.js:2887
+(anonymous) @ index-CcM2uhny.js:2856
+(anonymous) @ index-CcM2uhny.js:2856
+(anonymous) @ index-CcM2uhny.js:3115
+(anonymous) @ index-CcM2uhny.js:3115
+Promise.then
+Pc @ index-CcM2uhny.js:3115
+enqueue @ index-CcM2uhny.js:3115
+enqueueAndForget @ index-CcM2uhny.js:3115
+(anonymous) @ index-CcM2uhny.js:2856
+(anonymous) @ index-CcM2uhny.js:2856
+i_ @ index-CcM2uhny.js:2781
+(anonymous) @ index-CcM2uhny.js:2796
+setTimeout
+P_ @ index-CcM2uhny.js:2796
+z_ @ index-CcM2uhny.js:2856
+Q_ @ index-CcM2uhny.js:2856
+(anonymous) @ index-CcM2uhny.js:2856
+Promise.then
+auth @ index-CcM2uhny.js:2856
+start @ index-CcM2uhny.js:2856
+Ey @ index-CcM2uhny.js:2887
+VS @ index-CcM2uhny.js:2887
+$S @ index-CcM2uhny.js:2965
+await in $S
+PD @ index-CcM2uhny.js:2965
+Cy @ index-CcM2uhny.js:2950
+(anonymous) @ index-CcM2uhny.js:3040
+await in (anonymous)
+(anonymous) @ index-CcM2uhny.js:3115
+(anonymous) @ index-CcM2uhny.js:3115
+Promise.then
+Pc @ index-CcM2uhny.js:3115
+enqueue @ index-CcM2uhny.js:3115
+enqueueAndForget @ index-CcM2uhny.js:3115
+QD @ index-CcM2uhny.js:3040
+_a @ index-CcM2uhny.js:3356
+(anonymous) @ index-CcM2uhny.js:3614
+ah @ index-CcM2uhny.js:40
+tl @ index-CcM2uhny.js:40
+(anonymous) @ index-CcM2uhny.js:40
+j @ index-CcM2uhny.js:25
+U @ index-CcM2uhny.js:25
+postMessage
+L @ index-CcM2uhny.js:25
+U @ index-CcM2uhny.js:25
+postMessage
+L @ index-CcM2uhny.js:25
+U @ index-CcM2uhny.js:25
+postMessage
+L @ index-CcM2uhny.js:25
+U @ index-CcM2uhny.js:25
+postMessage
+L @ index-CcM2uhny.js:25
+U @ index-CcM2uhny.js:25
+postMessage
+L @ index-CcM2uhny.js:25
+ne @ index-CcM2uhny.js:25
+t.unstable_scheduleCallback @ index-CcM2uhny.js:25
+D1 @ index-CcM2uhny.js:40
+Ar @ index-CcM2uhny.js:40
+xs @ index-CcM2uhny.js:40
+BC @ index-CcM2uhny.js:38
+(anonymous) @ index-CcM2uhny.js:51
+Tt.startTransition @ index-CcM2uhny.js:9
+(anonymous) @ index-CcM2uhny.js:51
+x @ index-CcM2uhny.js:49
+(anonymous) @ index-CcM2uhny.js:49
+A @ index-CcM2uhny.js:3614
+await in A
+Ui @ index-CcM2uhny.js:37
+$i @ index-CcM2uhny.js:37
+ui @ index-CcM2uhny.js:37
+Z0 @ index-CcM2uhny.js:37
+ev @ index-CcM2uhny.js:37
+(anonymous) @ index-CcM2uhny.js:37
+Ap @ index-CcM2uhny.js:40
+Bi @ index-CcM2uhny.js:37
+Af @ index-CcM2uhny.js:37
+zl @ index-CcM2uhny.js:37
+js @ index-CcM2uhny.js:37

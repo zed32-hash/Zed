@@ -23,10 +23,6 @@ service cloud.firestore {
       return userDoc(uid).status == 'active';
     }
 
-    function isNotGhost(uid) {
-      return userDoc(uid).isGhostMode == false;
-    }
-
     function isChatParticipant(chatData) {
       return request.auth.uid in chatData.participants;
     }
@@ -39,8 +35,6 @@ service cloud.firestore {
     function withinDailyMessageLimit(uid) {
       let u = userDoc(uid);
       let count = u.dailyMessageCount;
-      // Allow if lastMessageReset is from a previous day (count resets)
-      let resetDate = u.lastMessageReset;
       return count < 20;
     }
 
@@ -58,10 +52,8 @@ service cloud.firestore {
     // ─────────────────────────────────────────────
     match /users/{uid} {
 
-      // Anyone signed in can read non-ghost, active profiles for discovery
       allow read: if isSignedIn();
 
-      // Only the owner can create their own document
       allow create: if isSignedIn()
                     && isOwner(uid)
                     && request.resource.data.uid == uid
@@ -70,15 +62,12 @@ service cloud.firestore {
                     && request.resource.data.dailyMessageCount == 0
                     && request.resource.data.isGhostMode == false;
 
-      // Owner can update their own profile fields (but not status/reportCount directly)
       allow update: if isSignedIn()
                     && isOwner(uid)
                     && (
-                      // Allow profile updates (username, bio, tags, avatar, location, ghost mode)
                       !request.resource.data.diff(resource.data).affectedKeys()
                         .hasAny(['reportCount', 'status', 'uid'])
                       ||
-                      // Allow incrementing dailyMessageCount (done in transaction)
                       (
                         request.resource.data.dailyMessageCount == resource.data.dailyMessageCount + 1
                         && !request.resource.data.diff(resource.data).affectedKeys()
@@ -86,32 +75,26 @@ service cloud.firestore {
                       )
                     );
 
-      // No one can delete user documents
       allow delete: if false;
     }
 
 
     // ─────────────────────────────────────────────
     // /swipes/{swipeId}
-    // Composite key format: swiperId_targetId
     // ─────────────────────────────────────────────
     match /swipes/{swipeId} {
 
-      // Swipers can read their own swipe records (to check mutual likes)
       allow read: if isSignedIn()
                   && (resource.data.swiperId == request.auth.uid
                    || resource.data.targetId == request.auth.uid);
 
-      // Only the swiper can create a swipe for themselves
       allow create: if isSignedIn()
                     && request.resource.data.swiperId == request.auth.uid
                     && isActive(request.auth.uid)
                     && request.resource.data.type in ['like', 'pass']
                     && request.resource.data.keys().hasAll(['swiperId', 'targetId', 'type', 'timestamp'])
-                    // Swipe ID must match the composite pattern swiperId_targetId
                     && swipeId == request.resource.data.swiperId + '_' + request.resource.data.targetId;
 
-      // Swipes are immutable once cast
       allow update: if false;
       allow delete: if false;
     }
@@ -122,12 +105,9 @@ service cloud.firestore {
     // ─────────────────────────────────────────────
     match /chats/{chatId} {
 
-      // Only participants can read a chat
       allow read: if isSignedIn()
                   && isChatParticipant(resource.data);
 
-      // Chats are created by the system (via mutual like logic) — allow if caller
-      // is one of the two participants and the doc is properly structured
       allow create: if isSignedIn()
                     && request.auth.uid in request.resource.data.participants
                     && request.resource.data.participants.size() == 2
@@ -138,13 +118,17 @@ service cloud.firestore {
                         'status', 'messageCount'
                        ]);
 
-      // Participants can update chat status (unlock, expire) and verdicts
+      // Participants can update: status, message metadata, AND the typing map
       allow update: if isSignedIn()
                     && isChatParticipant(resource.data)
-                    // Only allowed field changes: status, verdicts, lastMessageTimestamp, messageCount
                     && request.resource.data.diff(resource.data).affectedKeys()
-                        .hasOnly(['status', 'verdicts', 'lastMessageTimestamp', 'messageCount'])
-                    // Status can only move forward: active → unlocked or active → expired
+                        .hasOnly([
+                          'status',
+                          'verdicts',
+                          'lastMessageTimestamp',
+                          'messageCount',
+                          'typing'
+                        ])
                     && (
                       !request.resource.data.diff(resource.data).affectedKeys().hasAny(['status'])
                       || (resource.data.status == 'active'
@@ -160,14 +144,11 @@ service cloud.firestore {
       // ─────────────────────────────────────────────
       match /messages/{messageId} {
 
-        // Only participants can read messages
         allow read: if isSignedIn()
-                    && isChatParticipant(get(/databases/$(database)/documents/chats/$(chatId)).data);
+                    && isChatParticipant(
+                         get(/databases/$(database)/documents/chats/$(chatId)).data
+                       );
 
-        // Participant can send a message if:
-        // - Chat is not expired (or is unlocked)
-        // - They are active (not suspended)
-        // - Daily message count is under 20
         allow create: if isSignedIn()
                       && request.resource.data.senderId == request.auth.uid
                       && isActive(request.auth.uid)
@@ -183,8 +164,14 @@ service cloud.firestore {
                       && request.resource.data.text.size() <= 500
                       && request.resource.data.keys().hasAll(['senderId', 'text', 'timestamp']);
 
-        // Messages are immutable
-        allow update: if false;
+        // Allow participants to update only the reactions map (emoji reactions)
+        allow update: if isSignedIn()
+                      && isChatParticipant(
+                           get(/databases/$(database)/documents/chats/$(chatId)).data
+                         )
+                      && request.resource.data.diff(resource.data).affectedKeys()
+                           .hasOnly(['reactions']);
+
         allow delete: if false;
       }
     }
@@ -195,10 +182,8 @@ service cloud.firestore {
     // ─────────────────────────────────────────────
     match /reports/{reportId} {
 
-      // Only admins should read reports (restrict all client reads)
       allow read: if false;
 
-      // Any active signed-in user can file a report
       allow create: if isSignedIn()
                     && isActive(request.auth.uid)
                     && request.resource.data.reporterId == request.auth.uid
@@ -209,25 +194,53 @@ service cloud.firestore {
                         'reporterId', 'reportedId', 'reason', 'timestamp'
                        ]);
 
-      // Reports are immutable
       allow update: if false;
       allow delete: if false;
     }
 
 
     // ─────────────────────────────────────────────
-    // /happyHourQueue/active
-    // Global queue node for Happy Hour matchmaking
+    // /happyHourQueue/{docId}
     // ─────────────────────────────────────────────
     match /happyHourQueue/{docId} {
 
       allow read: if isSignedIn();
 
-      // Any active user can join/leave the queue
       allow create, update: if isSignedIn()
                              && isActive(request.auth.uid);
 
       allow delete: if false;
+    }
+
+
+    // ─────────────────────────────────────────────
+    // /rooms/{roomId}/messages/{messageId}
+    // Public tag-based rooms — any active signed-in user can read/write
+    // ─────────────────────────────────────────────
+    match /rooms/{roomId} {
+
+      allow read: if isSignedIn();
+
+      match /messages/{messageId} {
+
+        // Any active user can read room messages
+        allow read: if isSignedIn();
+
+        // Any active user can post to a room
+        allow create: if isSignedIn()
+                      && isActive(request.auth.uid)
+                      && request.resource.data.senderId == request.auth.uid
+                      && request.resource.data.text is string
+                      && request.resource.data.text.size() > 0
+                      && request.resource.data.text.size() <= 400
+                      && request.resource.data.keys().hasAll([
+                           'senderId', 'username', 'avatarUrl', 'text', 'timestamp'
+                         ]);
+
+        // Room messages are immutable
+        allow update: if false;
+        allow delete: if false;
+      }
     }
 
   }
