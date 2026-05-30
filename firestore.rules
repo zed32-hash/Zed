@@ -84,8 +84,12 @@ service cloud.firestore {
     // ─────────────────────────────────────────────
     match /swipes/{swipeId} {
 
+      // resource may be null when reading a doc that doesn't yet exist
+      // (e.g. checking for a reverse swipe before a mutual match).
+      // Null docs expose nothing, so allow; for existing docs enforce ownership.
       allow read: if isSignedIn()
-                  && (resource.data.swiperId == request.auth.uid
+                  && (resource == null
+                   || resource.data.swiperId == request.auth.uid
                    || resource.data.targetId == request.auth.uid);
 
       allow create: if isSignedIn()
