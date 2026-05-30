@@ -1,18 +1,21 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router'
 import { motion } from 'motion/react'
-import { MessageCircle, Clock, Lock, Inbox } from 'lucide-react'
+import { MessageCircle, Clock, Lock, Inbox, User } from 'lucide-react'
 import { collection, query, where, onSnapshot, doc, getDoc } from 'firebase/firestore'
 import { db } from '../firebase/config'
 import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
 import { AppNavbar } from '../components/app/AppNavbar'
+import { UserProfileModal, type ProfileData } from '../components/app/UserProfileModal'
 
 interface ChatPreview {
   chatId: string
   otherUid: string
   otherUsername: string
   otherAvatar: string
+  otherTags: string[]
+  otherBio: string
   status: 'active' | 'unlocked' | 'expired'
   expiresAt: Date | null
   lastMessageTimestamp: Date | null
@@ -45,6 +48,7 @@ export function InboxPage() {
   const navigate = useNavigate()
   const [chats, setChats] = useState<ChatPreview[]>([])
   const [loading, setLoading] = useState(true)
+  const [viewingProfile, setViewingProfile] = useState<ProfileData | null>(null)
 
   const bg = dark
     ? 'linear-gradient(160deg, #0A0914 0%, #1C1236 50%, #0E1A24 100%)'
@@ -64,11 +68,15 @@ export function InboxPage() {
           const otherUid = data.participants.find((p: string) => p !== user.uid)
           let otherUsername = 'Unknown'
           let otherAvatar = ''
+          let otherTags: string[] = []
+          let otherBio = ''
           try {
             const uSnap = await getDoc(doc(db, 'users', otherUid))
             if (uSnap.exists()) {
               otherUsername = uSnap.data().username
               otherAvatar = uSnap.data().avatarUrl
+              otherTags = uSnap.data().tags || []
+              otherBio = uSnap.data().bio || ''
             }
           } catch {}
           return {
@@ -76,6 +84,8 @@ export function InboxPage() {
             otherUid,
             otherUsername,
             otherAvatar,
+            otherTags,
+            otherBio,
             status: data.status,
             expiresAt: data.expiresAt ? (data.expiresAt.toDate ? data.expiresAt.toDate() : new Date(data.expiresAt)) : null,
             lastMessageTimestamp: data.lastMessageTimestamp ? (data.lastMessageTimestamp.toDate ? data.lastMessageTimestamp.toDate() : new Date(data.lastMessageTimestamp)) : null,
@@ -145,24 +155,27 @@ export function InboxPage() {
               const badge = getStatusBadge(chat)
               const isExpired = chat.status === 'expired' || (chat.expiresAt && chat.expiresAt < new Date())
               return (
-                <motion.button key={chat.chatId}
+                <motion.div key={chat.chatId}
                   initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                  onClick={() => !isExpired && navigate(`/chat/${chat.chatId}`)}
                   className="w-full rounded-2xl p-4 flex items-center gap-3 text-left transition-all"
                   style={{
                     background: cardBg, border: `1px solid ${border}`, backdropFilter: 'blur(16px)',
                     opacity: isExpired ? 0.6 : 1,
-                    cursor: isExpired ? 'not-allowed' : 'pointer',
                     boxShadow: isExpired ? 'none' : '0 4px 20px rgba(92,49,242,0.08)',
                   }}>
-                  <div className="relative flex-shrink-0">
+                  <button
+                    onClick={() => setViewingProfile({ uid: chat.otherUid, username: chat.otherUsername, avatarUrl: chat.otherAvatar, bio: chat.otherBio, tags: chat.otherTags })}
+                    className="relative flex-shrink-0 transition-transform hover:scale-105 active:scale-95">
                     <img src={chat.otherAvatar} alt="" className="w-12 h-12 rounded-xl"
                       style={{ border: `2px solid ${border}`, filter: isExpired ? 'grayscale(1)' : 'none' }} />
                     {chat.status === 'unlocked' && (
                       <span className="absolute -bottom-1 -right-1 text-xs">🔓</span>
                     )}
-                  </div>
-                  <div className="flex-1 min-w-0">
+                  </button>
+                  <button
+                    className="flex-1 min-w-0 text-left"
+                    onClick={() => !isExpired && navigate(`/chat/${chat.chatId}`)}
+                    style={{ cursor: isExpired ? 'not-allowed' : 'pointer' }}>
                     <div className="flex items-center justify-between">
                       <p style={{ fontWeight: 700, color: text, fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '0.9rem' }}>@{chat.otherUsername}</p>
                       {badge && <span className="text-xs font-semibold" style={{ color: badge.color, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{badge.label}</span>}
@@ -181,13 +194,21 @@ export function InboxPage() {
                         {chat.messageCount} msg{chat.messageCount !== 1 ? 's' : ''}
                       </span>
                     </div>
-                  </div>
-                </motion.button>
+                  </button>
+                  <button
+                    onClick={() => setViewingProfile({ uid: chat.otherUid, username: chat.otherUsername, avatarUrl: chat.otherAvatar, bio: chat.otherBio, tags: chat.otherTags })}
+                    className="flex-shrink-0 w-8 h-8 rounded-xl flex items-center justify-center transition-all"
+                    style={{ background: dark ? 'rgba(92,49,242,0.1)' : 'rgba(92,49,242,0.06)', color: '#5C31F2' }}>
+                    <User size={14} />
+                  </button>
+                </motion.div>
               )
             })}
           </div>
         )}
       </div>
+
+      <UserProfileModal profile={viewingProfile} onClose={() => setViewingProfile(null)} />
     </div>
   )
 }

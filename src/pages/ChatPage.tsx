@@ -10,6 +10,7 @@ import {
 import { db } from '../firebase/config'
 import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
+import { UserProfileModal, type ProfileData } from '../components/app/UserProfileModal'
 
 const REACTION_EMOJIS = ['❤️', '😂', '🔥', '💀', '✨']
 
@@ -94,6 +95,7 @@ export function ChatPage() {
   const [expired, setExpired] = useState(false)
   const [reactionPickerMsgId, setReactionPickerMsgId] = useState<string | null>(null)
   const [otherTyping, setOtherTyping] = useState(false)
+  const [viewingProfile, setViewingProfile] = useState<ProfileData | null>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const typingClearTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -275,14 +277,16 @@ export function ChatPage() {
           <div className="flex items-center gap-3 px-4 py-3 max-w-lg mx-auto">
             <button onClick={() => navigate('/inbox')} style={{ color: muted }}><ChevronLeft size={22} /></button>
             {otherProfile && (
-              <div className="relative">
+              <button
+                onClick={() => setViewingProfile(otherProfile)}
+                className="relative transition-transform hover:scale-105 active:scale-95">
                 <div style={{ overflow: 'hidden', borderRadius: '0.75rem', width: '2.5rem', height: '2.5rem', border: `2px solid ${border}` }}>
                   <img src={otherProfile.avatarUrl} alt="" className="w-full h-full" style={{ filter: blurLevel, transition: 'filter 0.5s', background: '#E3DCF8' }} />
                 </div>
                 {fullyRevealed && <span className="absolute -bottom-1 -right-1 text-xs">✨</span>}
-              </div>
+              </button>
             )}
-            <div className="flex-1">
+            <button className="flex-1 text-left" onClick={() => otherProfile && setViewingProfile(otherProfile)}>
               <p style={{ fontWeight: 700, color: textColor, fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '0.9rem' }}>
                 @{otherProfile?.username || '…'}
               </p>
@@ -299,7 +303,7 @@ export function ChatPage() {
                   </motion.p>
                 )}
               </AnimatePresence>
-            </div>
+            </button>
             <button onClick={() => setReportOpen(true)} style={{ color: muted }} title="Report"><Flag size={18} /></button>
           </div>
           {chatData?.status === 'unlocked' && (
@@ -516,6 +520,8 @@ export function ChatPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <UserProfileModal profile={viewingProfile} onClose={() => setViewingProfile(null)} />
     </div>
   )
 }

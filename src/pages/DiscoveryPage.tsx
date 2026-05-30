@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router'
 import { motion, AnimatePresence } from 'motion/react'
-import { Heart, X, Search, MapPin, Tags, Ghost, Zap, ChevronRight } from 'lucide-react'
+import { Heart, X, Search, MapPin, Tags, Ghost, Zap, ChevronRight, User } from 'lucide-react'
 import {
   collection, query, where, getDocs, doc, setDoc, serverTimestamp,
   getDoc,
@@ -12,6 +12,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
 import { AppNavbar } from '../components/app/AppNavbar'
 import { HappyHourOverlay } from '../components/app/HappyHourOverlay'
+import { UserProfileModal, type ProfileData } from '../components/app/UserProfileModal'
 
 interface Profile {
   uid: string
@@ -53,7 +54,7 @@ export function DiscoveryPage() {
   const [matchState, setMatchState] = useState<MatchState | null>(null)
   const [vibesProfile, setVibesProfile] = useState<Profile | null>(null)
   const [vibesDismissed, setVibesDismissed] = useState(false)
-  const [profileModal, setProfileModal] = useState<Profile | null>(null)
+  const [profileModal, setProfileModal] = useState<ProfileData | null>(null)
   const cardRefs = useRef<any[]>([])
 
   const bg = dark
@@ -326,8 +327,15 @@ export function DiscoveryPage() {
                   <div className="relative h-64 overflow-hidden" style={{ background: dark ? 'rgba(92,49,242,0.1)' : 'rgba(92,49,242,0.06)' }}>
                     <img src={p.avatarUrl} alt={p.username} className="w-full h-full object-cover" style={{ transform: 'scale(1.1)' }} />
                     <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.4))' }} />
-                    <div className="absolute bottom-4 left-4">
+                    <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between">
                       <p style={{ fontFamily: "'Clash Display', sans-serif", fontSize: '1.5rem', fontWeight: 700, color: '#fff' }}>@{p.username}</p>
+                      <button
+                        onPointerDown={e => e.stopPropagation()}
+                        onClick={e => { e.stopPropagation(); setProfileModal(p) }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold"
+                        style={{ background: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(8px)', color: '#fff', border: '1px solid rgba(255,255,255,0.3)', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                        <User size={12} /> Profile
+                      </button>
                     </div>
                   </div>
                   <div className="flex-1 p-4 flex flex-col gap-3 overflow-hidden">
@@ -448,93 +456,7 @@ export function DiscoveryPage() {
         )}
       </AnimatePresence>
 
-      {/* Profile detail modal */}
-      <AnimatePresence>
-        {profileModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-end justify-center p-4"
-            style={{ background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(10px)' }}
-            onClick={(e) => e.target === e.currentTarget && setProfileModal(null)}>
-            <motion.div
-              initial={{ y: 80, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 80, opacity: 0 }}
-              transition={{ type: 'spring', stiffness: 280, damping: 28 }}
-              className="w-full max-w-md rounded-3xl overflow-hidden"
-              style={{ background: dark ? '#1C1236' : '#FBF9F4', border: `1px solid ${border}`, boxShadow: '0 24px 60px rgba(0,0,0,0.3)' }}>
-
-              {/* Avatar banner */}
-              <div className="relative h-40 flex items-center justify-center"
-                style={{ background: dark ? 'rgba(92,49,242,0.12)' : 'rgba(92,49,242,0.07)' }}>
-                <img src={profileModal.avatarUrl} alt="" className="h-32 w-32 object-cover rounded-2xl"
-                  style={{ border: `3px solid ${border}`, background: '#E3DCF8', boxShadow: '0 8px 24px rgba(92,49,242,0.2)' }} />
-                <button onClick={() => setProfileModal(null)}
-                  className="absolute top-4 right-4 w-8 h-8 rounded-xl flex items-center justify-center"
-                  style={{ background: dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)', color: muted }}>
-                  <X size={15} />
-                </button>
-              </div>
-
-              <div className="p-5">
-                <h2 style={{ fontFamily: "'Clash Display', sans-serif", fontWeight: 800, fontSize: '1.4rem', color: text, marginBottom: '0.25rem' }}>
-                  @{profileModal.username}
-                </h2>
-
-                {profileModal.bio && (
-                  <p style={{ color: muted, fontSize: '0.85rem', fontFamily: "'Plus Jakarta Sans', sans-serif", lineHeight: 1.6, marginBottom: '1rem' }}>
-                    {profileModal.bio}
-                  </p>
-                )}
-
-                {/* Tags */}
-                <div className="flex flex-wrap gap-1.5 mb-4">
-                  {profileModal.tags.map((tag) => {
-                    const shared = profile?.tags.includes(tag)
-                    return (
-                      <span key={tag} className="px-2.5 py-1 rounded-full text-xs font-semibold"
-                        style={{ background: shared ? 'rgba(92,49,242,0.15)' : (dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'), color: shared ? '#5C31F2' : muted, border: `1px solid ${shared ? 'rgba(92,49,242,0.3)' : border}`, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-                        {tag} {shared ? '✓' : ''}
-                      </span>
-                    )
-                  })}
-                </div>
-
-                {/* Compatibility */}
-                {(() => {
-                  const shared = (profile?.tags || []).filter(t => profileModal.tags.includes(t))
-                  return shared.length > 0 ? (
-                    <div className="mb-4 px-3 py-2 rounded-xl"
-                      style={{ background: dark ? 'rgba(92,49,242,0.08)' : 'rgba(92,49,242,0.05)', border: `1px solid rgba(92,49,242,0.15)` }}>
-                      <p style={{ fontSize: '0.78rem', color: '#5C31F2', fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 600 }}>
-                        ✨ {shared.length} shared interest{shared.length > 1 ? 's' : ''}: {shared.join(', ')}
-                      </p>
-                    </div>
-                  ) : null
-                })()}
-
-                {/* Actions */}
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => { setProfileModal(null); handleSwipe('pass', profileModal.uid) }}
-                    className="flex-1 py-3 rounded-2xl font-semibold flex items-center justify-center gap-2"
-                    style={{ background: dark ? 'rgba(255,83,83,0.1)' : 'rgba(255,83,83,0.08)', border: '1.5px solid rgba(255,83,83,0.25)', color: '#FF5353', fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '0.875rem' }}>
-                    <X size={16} /> Pass
-                  </button>
-                  <button
-                    onClick={() => { setProfileModal(null); handleSwipe('right', profileModal.uid) }}
-                    className="flex-1 py-3 rounded-2xl font-semibold flex items-center justify-center gap-2"
-                    style={{ background: 'linear-gradient(135deg,#5C31F2,#7C3AED)', color: '#fff', fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '0.875rem', boxShadow: '0 4px 16px rgba(92,49,242,0.4)' }}>
-                    <Heart size={16} fill="#fff" /> Like
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <UserProfileModal profile={profileModal} onClose={() => setProfileModal(null)} />
     </div>
   )
 }

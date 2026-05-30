@@ -8,6 +8,7 @@ import { db } from '../firebase/config'
 import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
 import { AppNavbar } from '../components/app/AppNavbar'
+import { UserProfileModal, type ProfileData } from '../components/app/UserProfileModal'
 
 interface RoomMessage {
   id: string
@@ -52,6 +53,7 @@ export function RoomsPage() {
   const [messages, setMessages] = useState<RoomMessage[]>([])
   const [text, setText] = useState('')
   const [sending, setSending] = useState(false)
+  const [viewingProfile, setViewingProfile] = useState<ProfileData | null>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
 
   const bg = dark
@@ -197,13 +199,21 @@ export function RoomsPage() {
                   {!isMe && (
                     <div className="flex-shrink-0 w-7 h-7">
                       {showAvatar && (
-                        <img src={msg.avatarUrl} alt="" className="w-7 h-7 rounded-lg" style={{ border: `1.5px solid ${border}`, background: '#E3DCF8' }} />
+                        <button onClick={() => setViewingProfile({ uid: msg.senderId, username: msg.username, avatarUrl: msg.avatarUrl, tags: [] })}
+                          className="w-7 h-7 rounded-lg overflow-hidden transition-transform hover:scale-110 active:scale-95"
+                          style={{ border: `1.5px solid ${border}`, background: '#E3DCF8', flexShrink: 0 }}>
+                          <img src={msg.avatarUrl} alt="" className="w-full h-full" />
+                        </button>
                       )}
                     </div>
                   )}
                   <div className={`max-w-[75%] ${!isMe && showAvatar ? '' : !isMe ? 'ml-9' : ''}`}>
                     {showAvatar && !isMe && (
-                      <p className="text-xs mb-0.5 ml-1" style={{ color: muted, fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 600 }}>@{msg.username}</p>
+                      <button onClick={() => setViewingProfile({ uid: msg.senderId, username: msg.username, avatarUrl: msg.avatarUrl, tags: [] })}
+                        className="text-xs mb-0.5 ml-1 hover:underline"
+                        style={{ color: muted, fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 600 }}>
+                        @{msg.username}
+                      </button>
                     )}
                     <div className="px-3.5 py-2 rounded-2xl"
                       style={{
@@ -251,6 +261,8 @@ export function RoomsPage() {
           </div>
         </div>
       </div>
+
+      <UserProfileModal profile={viewingProfile} onClose={() => setViewingProfile(null)} />
     </div>
   )
 }
