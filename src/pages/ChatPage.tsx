@@ -38,6 +38,7 @@ interface OtherProfile {
   avatarUrl: string
   bio: string
   tags: string[]
+  unlimitedChat?: boolean
 }
 
 const ICEBREAKERS = [
@@ -139,7 +140,7 @@ export function ChatPage() {
         const uSnap = await getDoc(doc(db, 'users', otherUid))
         if (uSnap.exists()) {
           const ud = uSnap.data()
-          setOtherProfile({ uid: otherUid, username: ud.username, avatarUrl: ud.avatarUrl, bio: ud.bio, tags: ud.tags || [] })
+          setOtherProfile({ uid: otherUid, username: ud.username, avatarUrl: ud.avatarUrl, bio: ud.bio, tags: ud.tags || [], unlimitedChat: ud.unlimitedChat || false })
         }
       }
     })
@@ -296,9 +297,16 @@ export function ChatPage() {
               </button>
             )}
             <button className="flex-1 text-left" onClick={() => otherProfile && setViewingProfile(otherProfile)}>
-              <p style={{ fontWeight: 700, color: textColor, fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '0.9rem' }}>
-                @{otherProfile?.username || '…'}
-              </p>
+              <div className="flex items-center gap-1.5">
+                <p style={{ fontWeight: 700, color: textColor, fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '0.9rem' }}>
+                  @{otherProfile?.username || '…'}
+                </p>
+                {otherProfile?.unlimitedChat && (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', padding: '0.1rem 0.45rem', borderRadius: 999, background: 'linear-gradient(135deg,#5C31F2,#7C3AED)', fontSize: '0.6rem', fontWeight: 800, color: '#fff', letterSpacing: '0.06em', lineHeight: 1.6, flexShrink: 0, boxShadow: '0 2px 8px rgba(92,49,242,0.45)' }}>
+                    PRO
+                  </span>
+                )}
+              </div>
               <AnimatePresence mode="wait">
                 {otherTyping ? (
                   <motion.p key="typing" initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }}
