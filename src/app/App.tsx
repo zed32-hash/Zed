@@ -8,6 +8,7 @@ import { OnboardingPage } from '../pages/OnboardingPage'
 import { DiscoveryPage } from '../pages/DiscoveryPage'
 import { InboxPage } from '../pages/InboxPage'
 import { ChatPage } from '../pages/ChatPage'
+import { RoomsPage } from '../pages/RoomsPage'
 import { AdminPage } from '../pages/AdminPage'
 import { ManifestoPage } from '../pages/ManifestoPage'
 import { PrivacyPage } from '../pages/PrivacyPage'
@@ -26,30 +27,10 @@ export default function App() {
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/admin" element={<AdminPage />} />
-            <Route
-              path="/app"
-              element={
-                <ProtectedRoute>
-                  <DiscoveryPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/inbox"
-              element={
-                <ProtectedRoute>
-                  <InboxPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/chat/:chatId"
-              element={
-                <ProtectedRoute>
-                  <ChatPage />
-                </ProtectedRoute>
-              }
-            />
+            <Route path="/app" element={<ProtectedRoute><DiscoveryPage /></ProtectedRoute>} />
+            <Route path="/inbox" element={<ProtectedRoute><InboxPage /></ProtectedRoute>} />
+            <Route path="/rooms" element={<ProtectedRoute><RoomsPage /></ProtectedRoute>} />
+            <Route path="/chat/:chatId" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </AuthProvider>

@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router'
 import { motion, AnimatePresence } from 'motion/react'
-import { Heart, X, Search, MapPin, Tags, Ghost, SlidersHorizontal, MessageCircle } from 'lucide-react'
+import { Heart, X, Search, MapPin, Tags, Ghost, MessageCircle, Zap } from 'lucide-react'
 import {
   collection, query, where, getDocs, doc, setDoc, serverTimestamp,
-  addDoc, getDoc,
+  getDoc,
 } from 'firebase/firestore'
 import TinderCard from 'react-tinder-card'
 import { db } from '../firebase/config'
@@ -22,6 +22,11 @@ interface Profile {
   location: { geohash: string; lat: number; lng: number } | null
 }
 
+interface MatchState {
+  profile: Profile
+  chatId: string
+}
+
 function compatibilityText(myTags: string[], theirTags: string[]): string {
   const shared = myTags.filter((t) => theirTags.includes(t))
   if (shared.length === 0) return 'Opposites attract — explore the unknown.'
@@ -29,6 +34,8 @@ function compatibilityText(myTags: string[], theirTags: string[]): string {
   if (shared.length === 2) return `${shared[0]} & ${shared[1]} — two common threads, infinite conversations.`
   return `${shared.length} shared passions: ${shared.slice(0, 2).join(', ')} and more. Compatibility score: 🔥`
 }
+
+const VIBES_KEY = (uid: string) => `zed_vibes_${uid}`
 
 export function DiscoveryPage() {
   const { user, profile } = useAuth()
@@ -43,6 +50,9 @@ export function DiscoveryPage() {
   const [searchLoading, setSearchLoading] = useState(false)
   const [searchError, setSearchError] = useState('')
   const [currentIndex, setCurrentIndex] = useState(0)
+  const [matchState, setMatchState] = useState<MatchState | null>(null)
+  const [vibesProfile, setVibesProfile] = useState<Profile | null>(null)
+  const [vibesDismissed, setVibesDismissed] = useState(false)
   const cardRefs = useRef<any[]>([])
 
   const bg = dark
@@ -58,9 +68,7 @@ export function DiscoveryPage() {
     if (!user || !profile) return
     setLoading(true)
     try {
-      const swipesSnap = await getDocs(
-        query(collection(db, 'swipes'), where('swiperId', '==', user.uid))
-      )
+      const swipesSnap = await getDocs(query(collection(db, 'swipes'), where('swiperId', '==', user.uid)))
       const swipedIds = new Set(swipesSnap.docs.map((d) => d.data().targetId as string))
       swipedIds.add(user.uid)
 
@@ -96,6 +104,30 @@ export function DiscoveryPage() {
       setProfiles(candidates)
       setCurrentIndex(candidates.length - 1)
       cardRefs.current = candidates.map(() => null)
+
+      // Pick vibes card — best tag match, one per day per user
+      if (candidates.length > 0) {
+        const today = new Date().toDateString()
+        const stored = localStorage.getItem(VIBES_KEY(user.uid))
+        const parsed = stored ? JSON.parse(stored) : null
+        if (parsed?.date === today) {
+          setVibesDismissed(true)
+          if (parsed.uid) {
+            const vp = candidates.find(c => c.uid === parsed.uid) || null
+            setVibesProfile(vp)
+          }
+        } else {
+          const myTags = new Set(profile.tags)
+          const best = [...candidates].sort((a, b) => {
+            const aS = a.tags.filter(t => myTags.has(t)).length
+            const bS = b.tags.filter(t => myTags.has(t)).length
+            return bS - aS
+          })[0]
+          setVibesProfile(best || null)
+          setVibesDismissed(false)
+          localStorage.setItem(VIBES_KEY(user.uid), JSON.stringify({ date: today, uid: best?.uid }))
+        }
+      }
     } finally {
       setLoading(false)
     }
@@ -113,15 +145,13 @@ export function DiscoveryPage() {
     })
 
     if (type === 'like') {
-      const reverseId = `${targetId}_${user.uid}`
-      const reverseSnap = await getDoc(doc(db, 'swipes', reverseId))
+      const reverseSnap = await getDoc(doc(db, 'swipes', `${targetId}_${user.uid}`))
       if (reverseSnap.exists() && reverseSnap.data().type === 'like') {
         const chatId = [user.uid, targetId].sort().join('_')
         const chatRef = doc(db, 'chats', chatId)
         const chatSnap = await getDoc(chatRef)
         if (!chatSnap.exists()) {
-          const now = new Date()
-          const expiresAt = new Date(now.getTime() + 24 * 60 * 60 * 1000)
+          const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000)
           await setDoc(chatRef, {
             participants: [user.uid, targetId],
             createdAt: serverTimestamp(),
@@ -129,9 +159,20 @@ export function DiscoveryPage() {
             status: 'active',
             messageCount: 0,
             lastMessageTimestamp: null,
+            typing: {},
           })
         }
-        navigate(`/chat/${chatId}`)
+        const matched = profiles.find(p => p.uid === targetId)
+        if (matched) {
+          setMatchState({ profile: matched, chatId })
+          setTimeout(() => {
+            setMatchState(null)
+            navigate(`/chat/${chatId}`)
+          }, 2800)
+        } else {
+          navigate(`/chat/${chatId}`)
+        }
+        return
       }
     }
 
@@ -139,14 +180,16 @@ export function DiscoveryPage() {
   }
 
   const swipeLeft = () => {
-    if (currentIndex >= 0 && cardRefs.current[currentIndex]) {
-      cardRefs.current[currentIndex].swipe('left')
-    }
+    if (currentIndex >= 0 && cardRefs.current[currentIndex]) cardRefs.current[currentIndex].swipe('left')
   }
   const swipeRight = () => {
-    if (currentIndex >= 0 && cardRefs.current[currentIndex]) {
-      cardRefs.current[currentIndex].swipe('right')
-    }
+    if (currentIndex >= 0 && cardRefs.current[currentIndex]) cardRefs.current[currentIndex].swipe('right')
+  }
+
+  const handleVibesConnect = async () => {
+    if (!vibesProfile || !user) return
+    setVibesDismissed(true)
+    await handleSwipe('right', vibesProfile.uid)
   }
 
   const handleSearch = async () => {
@@ -174,27 +217,21 @@ export function DiscoveryPage() {
   return (
     <div className="min-h-screen relative overflow-hidden" style={{ background: bg }}>
       <div className="pointer-events-none absolute inset-0 z-0 opacity-25"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E")`,
-          backgroundRepeat: 'repeat', backgroundSize: '256px 256px', mixBlendMode: dark ? 'overlay' : 'multiply',
-        }}
-      />
+        style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E")`, backgroundRepeat: 'repeat', backgroundSize: '256px 256px', mixBlendMode: dark ? 'overlay' : 'multiply' }} />
 
       <AppNavbar />
       <HappyHourOverlay />
 
       <div className="relative z-10 max-w-lg mx-auto px-4 pt-20 pb-8">
+        {/* Search + sort */}
         <div className="flex items-center gap-3 mb-4">
           <div className="flex-1 relative">
             <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: muted }} />
-            <input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+            <input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
               placeholder="Search by username…"
               className="w-full pl-9 pr-4 py-2.5 rounded-xl outline-none text-sm"
-              style={{ background: cardBg, border: `1px solid ${border}`, color: text, backdropFilter: 'blur(12px)', fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-            />
+              style={{ background: cardBg, border: `1px solid ${border}`, color: text, backdropFilter: 'blur(12px)', fontFamily: "'Plus Jakarta Sans', sans-serif" }} />
           </div>
           <button onClick={() => setSortMode((m) => m === 'tags' ? 'location' : 'tags')}
             className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all"
@@ -213,12 +250,50 @@ export function DiscoveryPage() {
               <p style={{ fontWeight: 700, color: text, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>@{searchResult.username}</p>
               <p style={{ color: muted, fontSize: '0.75rem', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{searchResult.tags.join(' ')}</p>
             </div>
-            <button onClick={async () => { setSearchResult(null); setSearchQuery('') }}
-              style={{ color: muted }}><X size={16} /></button>
+            <button onClick={() => { setSearchResult(null); setSearchQuery('') }} style={{ color: muted }}><X size={16} /></button>
           </motion.div>
         )}
         {searchError && <p className="text-sm mb-3" style={{ color: '#FF5353', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{searchError}</p>}
 
+        {/* Vibes daily card */}
+        <AnimatePresence>
+          {!loading && vibesProfile && !vibesDismissed && (
+            <motion.div
+              initial={{ opacity: 0, y: -12, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -12, scale: 0.97 }}
+              className="mb-4 p-4 rounded-2xl flex items-center gap-3"
+              style={{ background: 'linear-gradient(135deg, rgba(92,49,242,0.12), rgba(255,132,75,0.08))', border: `1px solid rgba(92,49,242,0.25)`, backdropFilter: 'blur(16px)' }}>
+              <div className="relative flex-shrink-0">
+                <div className="w-12 h-12 rounded-xl overflow-hidden" style={{ border: '2px solid rgba(92,49,242,0.35)' }}>
+                  <img src={vibesProfile.avatarUrl} alt="" className="w-full h-full" style={{ background: '#E3DCF8' }} />
+                </div>
+                <span className="absolute -top-1.5 -right-1.5 text-xs">✨</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="flex items-center gap-1" style={{ fontSize: '0.68rem', color: '#5C31F2', fontWeight: 700, fontFamily: "'Plus Jakarta Sans', sans-serif", textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.15rem' }}>
+                  <Zap size={10} /> Today's Vibe
+                </p>
+                <p style={{ fontWeight: 700, color: text, fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '0.9rem' }}>@{vibesProfile.username}</p>
+                <p style={{ color: muted, fontSize: '0.72rem', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                  {(profile?.tags || []).filter(t => vibesProfile.tags.includes(t)).length} shared tags
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button onClick={handleVibesConnect}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all"
+                  style={{ background: 'linear-gradient(135deg,#5C31F2,#7C3AED)', color: '#fff', fontFamily: "'Plus Jakarta Sans', sans-serif", boxShadow: '0 4px 12px rgba(92,49,242,0.35)' }}>
+                  <Heart size={11} fill="#fff" /> Connect
+                </button>
+                <button onClick={() => setVibesDismissed(true)} style={{ color: muted }}>
+                  <X size={15} />
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Main swipe area */}
         <div className="relative h-[520px] flex items-center justify-center">
           {loading ? (
             <div className="flex flex-col items-center gap-3">
@@ -238,40 +313,19 @@ export function DiscoveryPage() {
             </div>
           ) : (
             profiles.map((p, i) => (
-              <TinderCard
-                key={p.uid}
-                ref={(el: any) => { cardRefs.current[i] = el }}
-                onSwipe={(dir) => handleSwipe(dir, p.uid)}
-                preventSwipe={['up', 'down']}
-                className="absolute"
-              >
-                <div
-                  className="rounded-3xl overflow-hidden cursor-grab active:cursor-grabbing select-none"
-                  style={{
-                    width: '340px', height: '480px', background: cardBg,
-                    border: `1px solid ${border}`, backdropFilter: 'blur(24px)',
-                    boxShadow: i === currentIndex ? '0 24px 64px rgba(92,49,242,0.2)' : '0 8px 24px rgba(0,0,0,0.1)',
-                    transform: `rotate(${(i - currentIndex) * 2}deg) scale(${i === currentIndex ? 1 : 0.97})`,
-                    transition: 'transform 0.2s',
-                    display: i < currentIndex - 2 ? 'none' : 'flex',
-                    flexDirection: 'column',
-                  }}
-                >
-                  <div className="relative h-64 overflow-hidden"
-                    style={{ background: dark ? 'rgba(92,49,242,0.1)' : 'rgba(92,49,242,0.06)' }}>
-                    <img src={p.avatarUrl} alt={p.username}
-                      className="w-full h-full object-cover"
-                      style={{ filter: 'blur(0px)', transform: 'scale(1.1)' }}
-                    />
+              <TinderCard key={p.uid} ref={(el: any) => { cardRefs.current[i] = el }}
+                onSwipe={(dir) => handleSwipe(dir, p.uid)} preventSwipe={['up', 'down']} className="absolute">
+                <div className="rounded-3xl overflow-hidden cursor-grab active:cursor-grabbing select-none"
+                  style={{ width: '340px', height: '480px', background: cardBg, border: `1px solid ${border}`, backdropFilter: 'blur(24px)', boxShadow: i === currentIndex ? '0 24px 64px rgba(92,49,242,0.2)' : '0 8px 24px rgba(0,0,0,0.1)', transform: `rotate(${(i - currentIndex) * 2}deg) scale(${i === currentIndex ? 1 : 0.97})`, transition: 'transform 0.2s', display: i < currentIndex - 2 ? 'none' : 'flex', flexDirection: 'column' }}>
+                  <div className="relative h-64 overflow-hidden" style={{ background: dark ? 'rgba(92,49,242,0.1)' : 'rgba(92,49,242,0.06)' }}>
+                    <img src={p.avatarUrl} alt={p.username} className="w-full h-full object-cover" style={{ transform: 'scale(1.1)' }} />
                     <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.4))' }} />
                     <div className="absolute bottom-4 left-4">
                       <p style={{ fontFamily: "'Clash Display', sans-serif", fontSize: '1.5rem', fontWeight: 700, color: '#fff' }}>@{p.username}</p>
                     </div>
                   </div>
-
                   <div className="flex-1 p-4 flex flex-col gap-3 overflow-hidden">
                     {p.bio && <p style={{ color: muted, fontSize: '0.8rem', fontFamily: "'Plus Jakarta Sans', sans-serif", lineHeight: 1.5 }} className="line-clamp-2">{p.bio}</p>}
-
                     <div className="flex flex-wrap gap-1.5">
                       {p.tags.slice(0, 5).map((tag) => {
                         const shared = profile?.tags.includes(tag)
@@ -283,9 +337,7 @@ export function DiscoveryPage() {
                         )
                       })}
                     </div>
-
-                    <div className="rounded-xl p-3 flex-1"
-                      style={{ background: dark ? 'rgba(92,49,242,0.08)' : 'rgba(92,49,242,0.05)', border: `1px solid rgba(92,49,242,0.12)` }}>
+                    <div className="rounded-xl p-3 flex-1" style={{ background: dark ? 'rgba(92,49,242,0.08)' : 'rgba(92,49,242,0.05)', border: `1px solid rgba(92,49,242,0.12)` }}>
                       <p style={{ fontSize: '0.72rem', color: '#5C31F2', fontWeight: 600, fontFamily: "'Plus Jakarta Sans', sans-serif", marginBottom: '0.25rem' }}>✨ Compatibility</p>
                       <p style={{ fontSize: '0.78rem', color: text, fontFamily: "'Plus Jakarta Sans', sans-serif", lineHeight: 1.4 }}>
                         {compatibilityText(profile?.tags || [], p.tags)}
@@ -317,13 +369,83 @@ export function DiscoveryPage() {
             </button>
           </div>
         )}
-
         {!loading && currentProfile && (
           <p className="text-center mt-3 text-xs" style={{ color: muted, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
             {currentIndex + 1} of {profiles.length} · Sorted by {sortMode === 'tags' ? 'shared tags' : 'location'}
           </p>
         )}
       </div>
+
+      {/* Match overlay */}
+      <AnimatePresence>
+        {matchState && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex flex-col items-center justify-center"
+            style={{ background: 'rgba(10,9,20,0.92)', backdropFilter: 'blur(20px)' }}>
+
+            {/* Particles */}
+            {[...Array(12)].map((_, i) => (
+              <motion.div key={i}
+                className="absolute rounded-full"
+                style={{ width: 6 + (i % 3) * 4, height: 6 + (i % 3) * 4, background: i % 2 === 0 ? '#5C31F2' : '#FF844B', left: `${10 + (i * 7) % 80}%`, top: `${15 + (i * 11) % 70}%` }}
+                animate={{ y: [-20, -60 - i * 8], x: [0, (i % 2 === 0 ? 1 : -1) * (10 + i * 4)], opacity: [0, 1, 0], scale: [0.5, 1, 0] }}
+                transition={{ duration: 1.8, delay: i * 0.1, ease: 'easeOut' }} />
+            ))}
+
+            <motion.div
+              initial={{ scale: 0.4, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: 'spring', stiffness: 260, damping: 20, delay: 0.1 }}
+              className="flex flex-col items-center gap-6 text-center px-8">
+
+              {/* Avatars overlap */}
+              <div className="flex items-center justify-center" style={{ position: 'relative', width: 120, height: 64 }}>
+                <div className="absolute left-0 w-14 h-14 rounded-2xl overflow-hidden" style={{ border: '3px solid #5C31F2', boxShadow: '0 0 20px rgba(92,49,242,0.5)' }}>
+                  {profile?.avatarUrl && <img src={profile.avatarUrl} alt="" className="w-full h-full" style={{ background: '#E3DCF8' }} />}
+                </div>
+                <motion.div animate={{ rotate: [0, -10, 10, 0] }} transition={{ repeat: Infinity, duration: 1.2 }}
+                  className="absolute z-10 w-8 h-8 rounded-xl flex items-center justify-center"
+                  style={{ background: 'linear-gradient(135deg,#FF844B,#FF5353)', boxShadow: '0 0 16px rgba(255,132,75,0.7)', left: '50%', top: '50%', transform: 'translate(-50%,-50%)' }}>
+                  <Heart size={14} fill="#fff" color="#fff" />
+                </motion.div>
+                <div className="absolute right-0 w-14 h-14 rounded-2xl overflow-hidden" style={{ border: '3px solid #FF844B', boxShadow: '0 0 20px rgba(255,132,75,0.5)' }}>
+                  <img src={matchState.profile.avatarUrl} alt="" className="w-full h-full" style={{ background: '#E3DCF8' }} />
+                </div>
+              </div>
+
+              <div>
+                <motion.h2
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                  style={{ fontFamily: "'Clash Display', sans-serif", fontSize: '2rem', fontWeight: 800, color: '#fff', lineHeight: 1.1, marginBottom: '0.5rem' }}>
+                  It's a Match! 🎉
+                </motion.h2>
+                <motion.p
+                  initial={{ y: 10, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.45 }}
+                  style={{ color: '#A6A4C5', fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '0.9rem' }}>
+                  You and @{matchState.profile.username} both liked each other
+                </motion.p>
+              </div>
+
+              <motion.button
+                initial={{ y: 10, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.6 }}
+                onClick={() => { setMatchState(null); navigate(`/chat/${matchState.chatId}`) }}
+                className="px-8 py-3 rounded-2xl font-bold text-sm"
+                style={{ background: 'linear-gradient(135deg,#5C31F2,#7C3AED)', color: '#fff', fontFamily: "'Plus Jakarta Sans', sans-serif", boxShadow: '0 8px 24px rgba(92,49,242,0.5)' }}>
+                Start Chatting →
+              </motion.button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

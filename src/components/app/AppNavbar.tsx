@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router'
 import { motion, AnimatePresence } from 'motion/react'
-import { Sun, Moon, MessageCircle, Compass, LogOut, Ghost, Menu, X } from 'lucide-react'
+import { Sun, Moon, MessageCircle, Compass, LogOut, Ghost, Menu, X, Hash } from 'lucide-react'
 import { doc, updateDoc, collection, query, where, onSnapshot } from 'firebase/firestore'
 import { db } from '../../firebase/config'
 import { useAuth } from '../../contexts/AuthContext'
@@ -11,10 +11,8 @@ const INBOX_LAST_VISIT_KEY = (uid: string) => `zed_inbox_last_visit_${uid}`
 
 function useUnreadChatsCount(uid: string | undefined) {
   const [count, setCount] = useState(0)
-
   useEffect(() => {
     if (!uid) return
-
     const q = query(collection(db, 'chats'), where('participants', 'array-contains', uid))
     const unsub = onSnapshot(q, (snap) => {
       const lastVisit = parseInt(localStorage.getItem(INBOX_LAST_VISIT_KEY(uid)) || '0', 10)
@@ -24,9 +22,7 @@ function useUnreadChatsCount(uid: string | undefined) {
         if (data.status === 'expired') return
         if (!data.messageCount || data.messageCount === 0) return
         const lastMsg: number = data.lastMessageTimestamp
-          ? (data.lastMessageTimestamp.toDate
-            ? data.lastMessageTimestamp.toDate().getTime()
-            : new Date(data.lastMessageTimestamp).getTime())
+          ? (data.lastMessageTimestamp.toDate ? data.lastMessageTimestamp.toDate().getTime() : new Date(data.lastMessageTimestamp).getTime())
           : 0
         if (lastMsg > lastVisit) unread++
       })
@@ -34,7 +30,6 @@ function useUnreadChatsCount(uid: string | undefined) {
     })
     return unsub
   }, [uid])
-
   return count
 }
 
@@ -70,20 +65,20 @@ export function AppNavbar() {
   }
 
   const handleInboxClick = () => {
-    if (user) {
-      localStorage.setItem(INBOX_LAST_VISIT_KEY(user.uid), Date.now().toString())
-    }
+    if (user) localStorage.setItem(INBOX_LAST_VISIT_KEY(user.uid), Date.now().toString())
     navigate('/inbox')
   }
 
   const navItems = [
     { path: '/app', icon: Compass, label: 'Discover', onClick: () => navigate('/app') },
+    { path: '/rooms', icon: Hash, label: 'Rooms', onClick: () => navigate('/rooms') },
     { path: '/inbox', icon: MessageCircle, label: 'Inbox', onClick: handleInboxClick },
   ]
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 py-3"
       style={{ background: bg, backdropFilter: 'blur(20px)', borderBottom: `1px solid ${border}` }}>
+
       <button onClick={() => navigate('/app')} className="flex items-center gap-2">
         <div className="w-8 h-8 rounded-xl flex items-center justify-center"
           style={{ background: 'linear-gradient(135deg,#5C31F2,#7C3AED)', boxShadow: '0 4px 12px rgba(92,49,242,0.35)' }}>
@@ -92,7 +87,7 @@ export function AppNavbar() {
         <span style={{ fontFamily: "'Clash Display', sans-serif", fontWeight: 700, fontSize: '1.1rem', color: text }}>ZED</span>
       </button>
 
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-0.5">
         {navItems.map(({ path, icon: Icon, label, onClick }) => {
           const active = location.pathname === path
           const isInbox = path === '/inbox'
@@ -103,34 +98,13 @@ export function AppNavbar() {
               style={{
                 background: active ? (dark ? 'rgba(92,49,242,0.15)' : 'rgba(92,49,242,0.1)') : 'transparent',
                 color: active ? '#5C31F2' : muted,
-                fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '0.8rem', fontWeight: 600,
+                fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '0.78rem', fontWeight: 600,
               }}>
               <span className="relative">
                 <Icon size={15} />
                 {showBadge && (
-                  <motion.span
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    exit={{ scale: 0 }}
-                    style={{
-                      position: 'absolute',
-                      top: -5,
-                      right: -5,
-                      minWidth: 14,
-                      height: 14,
-                      borderRadius: 999,
-                      background: 'linear-gradient(135deg,#FF844B,#FF5353)',
-                      color: '#fff',
-                      fontSize: '0.58rem',
-                      fontWeight: 800,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      padding: '0 3px',
-                      boxShadow: '0 1px 6px rgba(255,83,83,0.5)',
-                      lineHeight: 1,
-                      fontFamily: "'Plus Jakarta Sans', sans-serif",
-                    }}>
+                  <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }}
+                    style={{ position: 'absolute', top: -5, right: -5, minWidth: 14, height: 14, borderRadius: 999, background: 'linear-gradient(135deg,#FF844B,#FF5353)', color: '#fff', fontSize: '0.58rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 3px', boxShadow: '0 1px 6px rgba(255,83,83,0.5)', lineHeight: 1, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
                     {unreadCount > 9 ? '9+' : unreadCount}
                   </motion.span>
                 )}
