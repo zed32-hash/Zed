@@ -23,6 +23,7 @@ export interface UserProfile {
   status: 'active' | 'suspended'
   reportCount: number
   location: { geohash: string; lat: number; lng: number } | null
+  unlimitedChat?: boolean
 }
 
 interface AuthContextValue {
@@ -62,6 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         status: data.status || 'active',
         reportCount: data.reportCount || 0,
         location: data.location || null,
+        unlimitedChat: data.unlimitedChat || false,
       })
       setNeedsOnboarding(!data.username)
     } else {

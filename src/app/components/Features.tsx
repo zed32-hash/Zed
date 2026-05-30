@@ -1,5 +1,6 @@
 import { motion } from 'motion/react'
-import { Ghost, Zap, Lock, MessageSquare, Eye, UserCheck, MapPin, Flame } from 'lucide-react'
+import { Ghost, Zap, Lock, MessageSquare, Eye, UserCheck, MapPin, Flame, ShieldAlert } from 'lucide-react'
+import { useNavigate } from 'react-router'
 
 interface FeaturesProps { dark: boolean }
 
@@ -79,6 +80,7 @@ const features = [
 ]
 
 export function Features({ dark }: FeaturesProps) {
+  const navigate = useNavigate()
   const text = dark ? '#F5F5FA' : '#1A173B'
   const muted = dark ? '#A6A4C5' : '#7B78A8'
   const sectionBg = dark
@@ -138,6 +140,19 @@ export function Features({ dark }: FeaturesProps) {
             )
           })}
         </div>
+
+        {/* Admin link */}
+        <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.6 }}
+          className="flex justify-center mt-12">
+          <button
+            onClick={() => navigate('/admin')}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '0.6rem 1.25rem', borderRadius: 12, background: dark ? 'rgba(28,18,54,0.5)' : 'rgba(92,49,242,0.05)', border: `1px solid ${dark ? 'rgba(124,58,237,0.18)' : 'rgba(92,49,242,0.12)'}`, color: muted, fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', backdropFilter: 'blur(12px)', letterSpacing: '0.02em', transition: 'all 0.2s' }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = '#5C31F2'; (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(92,49,242,0.35)' }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = muted; (e.currentTarget as HTMLButtonElement).style.borderColor = dark ? 'rgba(124,58,237,0.18)' : 'rgba(92,49,242,0.12)' }}>
+            <ShieldAlert size={13} />
+            Admin
+          </button>
+        </motion.div>
       </div>
     </section>
   )

@@ -92,6 +92,7 @@ export function ChatPage() {
   const [reportReason, setReportReason] = useState('')
   const [reportSent, setReportSent] = useState(false)
   const [dailyLimitHit, setDailyLimitHit] = useState(false)
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [expired, setExpired] = useState(false)
   const [reactionPickerMsgId, setReactionPickerMsgId] = useState<string | null>(null)
   const [otherTyping, setOtherTyping] = useState(false)
@@ -162,13 +163,16 @@ export function ChatPage() {
 
   useEffect(() => {
     if (!profile) return
+    if (profile.unlimitedChat) { setDailyLimitHit(false); return }
     const count = profile.dailyMessageCount || 0
     const lastReset = profile.lastMessageReset
     if (lastReset) {
       const midnight = new Date(); midnight.setHours(0, 0, 0, 0)
       if (lastReset < midnight) { setDailyLimitHit(false); return }
     }
-    setDailyLimitHit(count >= 20)
+    const hit = count >= 20
+    if (hit && !dailyLimitHit) setShowUpgradeModal(true)
+    setDailyLimitHit(hit)
   }, [profile])
 
   useEffect(() => {
@@ -230,7 +234,7 @@ export function ChatPage() {
         const lastReset = ud.lastMessageReset?.toDate?.() || null
         const midnight = new Date(); midnight.setHours(0, 0, 0, 0)
         if (!lastReset || lastReset < midnight) currentCount = 0
-        if (currentCount >= 20) throw new Error('DAILY_LIMIT')
+        if (currentCount >= 20 && !ud.unlimitedChat) throw new Error('DAILY_LIMIT')
         const msgRef = doc(collection(db, 'chats', chatId, 'messages'))
         tx.set(msgRef, { senderId: user.uid, text: messageText, timestamp: serverTimestamp(), reactions: {} })
         tx.update(doc(db, 'chats', chatId), {
@@ -451,9 +455,15 @@ export function ChatPage() {
         <div style={{ background: dark ? 'rgba(10,9,20,0.8)' : 'rgba(251,249,244,0.8)', backdropFilter: 'blur(20px)', borderTop: `1px solid ${border}` }}>
           <div className="max-w-lg mx-auto px-4 py-3">
             {dailyLimitHit ? (
-              <div className="flex items-center gap-2 px-4 py-3 rounded-xl" style={{ background: 'rgba(255,132,75,0.1)', border: '1px solid rgba(255,132,75,0.2)' }}>
-                <Clock size={16} color="#FF844B" />
-                <p style={{ color: '#FF844B', fontSize: '0.82rem', fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 600 }}>Daily conversation energy spent. Resets at midnight.</p>
+              <div className="flex items-center justify-between gap-2 px-4 py-3 rounded-xl" style={{ background: 'rgba(255,132,75,0.1)', border: '1px solid rgba(255,132,75,0.2)' }}>
+                <div className="flex items-center gap-2">
+                  <Clock size={16} color="#FF844B" />
+                  <p style={{ color: '#FF844B', fontSize: '0.82rem', fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 600 }}>Daily limit reached. Resets at midnight.</p>
+                </div>
+                <button onClick={() => setShowUpgradeModal(true)}
+                  style={{ padding: '0.3rem 0.85rem', borderRadius: 8, background: 'linear-gradient(135deg,#5C31F2,#7C3AED)', color: '#fff', fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '0.75rem', fontWeight: 700, border: 'none', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                  Upgrade ✦
+                </button>
               </div>
             ) : expired ? (
               <div className="flex items-center gap-2 px-4 py-3 rounded-xl" style={{ background: 'rgba(255,83,83,0.1)', border: '1px solid rgba(255,83,83,0.2)' }}>
@@ -476,7 +486,7 @@ export function ChatPage() {
             )}
             {!expired && !dailyLimitHit && profile && (
               <p className="text-xs mt-1.5 text-right" style={{ color: muted, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-                {profile.dailyMessageCount || 0}/20 daily messages used
+                {profile.unlimitedChat ? '∞ Pro — unlimited messages' : `${profile.dailyMessageCount || 0}/20 daily messages used`}
               </p>
             )}
           </div>
@@ -527,6 +537,69 @@ export function ChatPage() {
       </AnimatePresence>
 
       <UserProfileModal profile={viewingProfile} onClose={() => setViewingProfile(null)} />
+
+      {/* Upgrade to Pro modal */}
+      <AnimatePresence>
+        {showUpgradeModal && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{ background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(12px)' }}
+            onClick={(e) => e.target === e.currentTarget && setShowUpgradeModal(false)}>
+            <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }}
+              className="w-full max-w-sm rounded-3xl p-7 relative overflow-hidden"
+              style={{ background: dark ? '#1C1236' : '#FBF9F4', border: `1px solid ${border}`, boxShadow: '0 32px 80px rgba(92,49,242,0.25)' }}>
+              {/* Glow */}
+              <div className="pointer-events-none absolute -top-12 -right-12 w-48 h-48 rounded-full blur-3xl"
+                style={{ background: 'rgba(92,49,242,0.25)' }} />
+              <button onClick={() => setShowUpgradeModal(false)}
+                className="absolute top-4 right-4" style={{ color: muted, cursor: 'pointer', background: 'none', border: 'none' }}>
+                <X size={18} />
+              </button>
+
+              {/* Badge */}
+              <div className="flex justify-center mb-5">
+                <div style={{ background: 'linear-gradient(135deg,#5C31F2,#7C3AED)', borderRadius: 16, padding: '14px', display: 'inline-flex', boxShadow: '0 8px 24px rgba(92,49,242,0.45)' }}>
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="#fff" />
+                  </svg>
+                </div>
+              </div>
+
+              <h2 style={{ fontFamily: "'Clash Display', sans-serif", fontWeight: 700, fontSize: '1.6rem', color: textColor, textAlign: 'center', marginBottom: '0.5rem' }}>
+                You've hit your limit
+              </h2>
+              <p style={{ color: muted, fontSize: '0.875rem', fontFamily: "'Plus Jakarta Sans', sans-serif", textAlign: 'center', lineHeight: 1.6, marginBottom: '1.75rem' }}>
+                You've used all 20 daily messages. Upgrade to <strong style={{ color: textColor }}>ZED Pro</strong> for unlimited conversations — no resets, no waiting.
+              </p>
+
+              {/* What you get */}
+              <div style={{ background: dark ? 'rgba(92,49,242,0.08)' : 'rgba(92,49,242,0.05)', border: '1px solid rgba(92,49,242,0.15)', borderRadius: 14, padding: '1rem 1.25rem', marginBottom: '1.5rem' }}>
+                {['Unlimited daily messages', 'Priority matching in Happy Hour', 'Early access to new features'].map((perk) => (
+                  <div key={perk} className="flex items-center gap-2.5 mb-1.5 last:mb-0">
+                    <div style={{ width: 18, height: 18, borderRadius: '50%', background: 'rgba(92,49,242,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                        <path d="M2 5L4 7L8 3" stroke="#5C31F2" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </div>
+                    <p style={{ fontSize: '0.82rem', color: textColor, fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 500 }}>{perk}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* CTA */}
+              <a href="sms:+15794713458" style={{ textDecoration: 'none' }}>
+                <button
+                  style={{ width: '100%', padding: '0.9rem', borderRadius: 14, background: 'linear-gradient(135deg,#5C31F2,#7C3AED)', color: '#fff', fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: '1rem', border: 'none', cursor: 'pointer', boxShadow: '0 6px 20px rgba(92,49,242,0.4)', marginBottom: '0.75rem' }}>
+                  Text us to upgrade — +1 (579) 471-3458
+                </button>
+              </a>
+              <p style={{ textAlign: 'center', fontSize: '0.75rem', color: muted, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+                Text "PRO" to unlock your account instantly
+              </p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
