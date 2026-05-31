@@ -16,6 +16,7 @@ interface ChatPreview {
   otherAvatar: string
   otherTags: string[]
   otherBio: string
+  otherUnlimitedChat: boolean
   status: 'active' | 'unlocked' | 'expired'
   expiresAt: Date | null
   lastMessageTimestamp: Date | null
@@ -70,6 +71,7 @@ export function InboxPage() {
           let otherAvatar = ''
           let otherTags: string[] = []
           let otherBio = ''
+          let otherUnlimitedChat = false
           try {
             const uSnap = await getDoc(doc(db, 'users', otherUid))
             if (uSnap.exists()) {
@@ -77,6 +79,7 @@ export function InboxPage() {
               otherAvatar = uSnap.data().avatarUrl
               otherTags = uSnap.data().tags || []
               otherBio = uSnap.data().bio || ''
+              otherUnlimitedChat = uSnap.data().unlimitedChat || false
             }
           } catch {}
           return {
@@ -86,6 +89,7 @@ export function InboxPage() {
             otherAvatar,
             otherTags,
             otherBio,
+            otherUnlimitedChat,
             status: data.status,
             expiresAt: data.expiresAt ? (data.expiresAt.toDate ? data.expiresAt.toDate() : new Date(data.expiresAt)) : null,
             lastMessageTimestamp: data.lastMessageTimestamp ? (data.lastMessageTimestamp.toDate ? data.lastMessageTimestamp.toDate() : new Date(data.lastMessageTimestamp)) : null,
@@ -164,7 +168,7 @@ export function InboxPage() {
                     boxShadow: isExpired ? 'none' : '0 4px 20px rgba(92,49,242,0.08)',
                   }}>
                   <button
-                    onClick={() => setViewingProfile({ uid: chat.otherUid, username: chat.otherUsername, avatarUrl: chat.otherAvatar, bio: chat.otherBio, tags: chat.otherTags })}
+                    onClick={() => setViewingProfile({ uid: chat.otherUid, username: chat.otherUsername, avatarUrl: chat.otherAvatar, bio: chat.otherBio, tags: chat.otherTags, unlimitedChat: chat.otherUnlimitedChat })}
                     className="relative flex-shrink-0 transition-transform hover:scale-105 active:scale-95">
                     <img src={chat.otherAvatar} alt="" className="w-12 h-12 rounded-xl"
                       style={{ border: `2px solid ${border}`, filter: isExpired ? 'grayscale(1)' : 'none' }} />
@@ -177,7 +181,14 @@ export function InboxPage() {
                     onClick={() => !isExpired && navigate(`/chat/${chat.chatId}`)}
                     style={{ cursor: isExpired ? 'not-allowed' : 'pointer' }}>
                     <div className="flex items-center justify-between">
-                      <p style={{ fontWeight: 700, color: text, fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '0.9rem' }}>@{chat.otherUsername}</p>
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <p style={{ fontWeight: 700, color: text, fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '0.9rem' }}>@{chat.otherUsername}</p>
+                        {chat.otherUnlimitedChat && (
+                          <span style={{ display: 'inline-flex', alignItems: 'center', padding: '0.1rem 0.4rem', borderRadius: 999, background: 'linear-gradient(135deg,#5C31F2,#7C3AED)', fontSize: '0.58rem', fontWeight: 800, color: '#fff', letterSpacing: '0.06em', flexShrink: 0, boxShadow: '0 2px 6px rgba(92,49,242,0.4)' }}>
+                            PRO
+                          </span>
+                        )}
+                      </div>
                       {badge && <span className="text-xs font-semibold" style={{ color: badge.color, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{badge.label}</span>}
                     </div>
                     <div className="flex items-center gap-2 mt-0.5">
@@ -196,7 +207,7 @@ export function InboxPage() {
                     </div>
                   </button>
                   <button
-                    onClick={() => setViewingProfile({ uid: chat.otherUid, username: chat.otherUsername, avatarUrl: chat.otherAvatar, bio: chat.otherBio, tags: chat.otherTags })}
+                    onClick={() => setViewingProfile({ uid: chat.otherUid, username: chat.otherUsername, avatarUrl: chat.otherAvatar, bio: chat.otherBio, tags: chat.otherTags, unlimitedChat: chat.otherUnlimitedChat })}
                     className="flex-shrink-0 w-8 h-8 rounded-xl flex items-center justify-center transition-all"
                     style={{ background: dark ? 'rgba(92,49,242,0.1)' : 'rgba(92,49,242,0.06)', color: '#5C31F2' }}>
                     <User size={14} />

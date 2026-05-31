@@ -13,6 +13,7 @@ export interface ProfileData {
   avatarUrl: string
   bio?: string
   tags: string[]
+  unlimitedChat?: boolean
 }
 
 interface UserProfileModalProps {
@@ -46,7 +47,7 @@ export function UserProfileModal({ profile, onClose }: UserProfileModalProps) {
           participants: [user.uid, profile.uid],
           createdAt: serverTimestamp(),
           expiresAt: null,
-          status: 'unlocked',
+          status: 'active',
           messageCount: 0,
           lastMessageTimestamp: null,
           typing: {},
@@ -106,9 +107,16 @@ export function UserProfileModal({ profile, onClose }: UserProfileModalProps) {
 
             {/* Info */}
             <div className="p-5">
-              <h2 style={{ fontFamily: "'Clash Display', sans-serif", fontSize: '1.5rem', fontWeight: 700, color: text, marginBottom: '0.15rem' }}>
-                @{profile.username}
-              </h2>
+              <div className="flex items-center gap-2 mb-0.5">
+                <h2 style={{ fontFamily: "'Clash Display', sans-serif", fontSize: '1.5rem', fontWeight: 700, color: text }}>
+                  @{profile.username}
+                </h2>
+                {profile.unlimitedChat && (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', padding: '0.15rem 0.5rem', borderRadius: 999, background: 'linear-gradient(135deg,#5C31F2,#7C3AED)', fontSize: '0.62rem', fontWeight: 800, color: '#fff', letterSpacing: '0.06em', flexShrink: 0, boxShadow: '0 2px 8px rgba(92,49,242,0.45)', marginTop: '0.25rem' }}>
+                    PRO
+                  </span>
+                )}
+              </div>
 
               {profile.bio && (
                 <p style={{ color: muted, fontSize: '0.85rem', fontFamily: "'Plus Jakarta Sans', sans-serif", lineHeight: 1.55, marginBottom: '1rem' }}>

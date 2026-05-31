@@ -21,6 +21,7 @@ interface Profile {
   bio: string
   tags: string[]
   location: { geohash: string; lat: number; lng: number } | null
+  unlimitedChat?: boolean
 }
 
 interface MatchState {
@@ -82,7 +83,7 @@ export function DiscoveryPage() {
         .filter((d) => !swipedIds.has(d.id))
         .map((d) => {
           const data = d.data()
-          return { uid: d.id, username: data.username, avatarUrl: data.avatarUrl, bio: data.bio, tags: data.tags || [], location: data.location || null }
+          return { uid: d.id, username: data.username, avatarUrl: data.avatarUrl, bio: data.bio, tags: data.tags || [], location: data.location || null, unlimitedChat: data.unlimitedChat || false }
         })
         .filter((p) => p.username)
 
@@ -207,7 +208,7 @@ export function DiscoveryPage() {
       } else {
         const d = snap.docs[0]
         const data = d.data()
-        setSearchResult({ uid: d.id, username: data.username, avatarUrl: data.avatarUrl, bio: data.bio, tags: data.tags || [], location: data.location || null })
+        setSearchResult({ uid: d.id, username: data.username, avatarUrl: data.avatarUrl, bio: data.bio, tags: data.tags || [], location: data.location || null, unlimitedChat: data.unlimitedChat || false })
       }
     } finally {
       setSearchLoading(false)
@@ -250,7 +251,14 @@ export function DiscoveryPage() {
             style={{ background: cardBg, border: `1px solid ${border}`, backdropFilter: 'blur(12px)', boxShadow: '0 4px 20px rgba(92,49,242,0.1)' }}>
             <img src={searchResult.avatarUrl} alt="" className="w-12 h-12 rounded-xl" style={{ border: `2px solid ${border}`, background: '#E3DCF8' }} />
             <div className="flex-1 min-w-0">
-              <p style={{ fontWeight: 700, color: text, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>@{searchResult.username}</p>
+              <div className="flex items-center gap-1.5">
+                <p style={{ fontWeight: 700, color: text, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>@{searchResult.username}</p>
+                {searchResult.unlimitedChat && (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', padding: '0.1rem 0.4rem', borderRadius: 999, background: 'linear-gradient(135deg,#5C31F2,#7C3AED)', fontSize: '0.58rem', fontWeight: 800, color: '#fff', letterSpacing: '0.06em', flexShrink: 0, boxShadow: '0 2px 6px rgba(92,49,242,0.4)' }}>
+                    PRO
+                  </span>
+                )}
+              </div>
               <p style={{ color: muted, fontSize: '0.75rem', fontFamily: "'Plus Jakarta Sans', sans-serif" }} className="truncate">{searchResult.tags.slice(0, 4).join(' ')}</p>
             </div>
             <div className="flex items-center gap-2">
@@ -328,7 +336,14 @@ export function DiscoveryPage() {
                     <img src={p.avatarUrl} alt={p.username} className="w-full h-full object-cover" style={{ transform: 'scale(1.1)' }} />
                     <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.4))' }} />
                     <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between">
-                      <p style={{ fontFamily: "'Clash Display', sans-serif", fontSize: '1.5rem', fontWeight: 700, color: '#fff' }}>@{p.username}</p>
+                      <div className="flex items-end gap-2">
+                        <p style={{ fontFamily: "'Clash Display', sans-serif", fontSize: '1.5rem', fontWeight: 700, color: '#fff' }}>@{p.username}</p>
+                        {p.unlimitedChat && (
+                          <span style={{ display: 'inline-flex', alignItems: 'center', padding: '0.15rem 0.5rem', borderRadius: 999, background: 'linear-gradient(135deg,#5C31F2,#7C3AED)', fontSize: '0.62rem', fontWeight: 800, color: '#fff', letterSpacing: '0.06em', flexShrink: 0, boxShadow: '0 2px 8px rgba(92,49,242,0.6)', marginBottom: '0.3rem' }}>
+                            PRO
+                          </span>
+                        )}
+                      </div>
                       <button
                         onPointerDown={e => e.stopPropagation()}
                         onClick={e => { e.stopPropagation(); setProfileModal(p) }}
