@@ -4,6 +4,7 @@ import { AuthProvider } from '../contexts/AuthContext'
 import { ThemeProvider } from '../contexts/ThemeContext'
 import { ProtectedRoute } from '../components/app/ProtectedRoute'
 import { MessageNotifications } from '../components/app/MessageNotifications'
+import { MatchNotifications } from '../components/app/MatchNotifications'
 import { LandingPage } from '../pages/LandingPage'
 import { SignupPage } from '../pages/SignupPage'
 import { OnboardingPage } from '../pages/OnboardingPage'
@@ -22,6 +23,7 @@ export default function App() {
       <ThemeProvider>
         <AuthProvider>
           <MessageNotifications />
+          <MatchNotifications />
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/signup" element={<SignupPage />} />
