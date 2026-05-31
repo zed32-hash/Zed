@@ -13,6 +13,7 @@ import { useTheme } from '../contexts/ThemeContext'
 import { AppNavbar } from '../components/app/AppNavbar'
 import { HappyHourOverlay } from '../components/app/HappyHourOverlay'
 import { UserProfileModal, type ProfileData } from '../components/app/UserProfileModal'
+import { BlindDateCountdown } from '../components/app/BlindDateCountdown'
 
 interface Profile {
   uid: string
@@ -226,6 +227,9 @@ export function DiscoveryPage() {
       <HappyHourOverlay />
 
       <div className="relative z-10 max-w-lg mx-auto px-4 pt-20 pb-8">
+        {/* Blind date countdown */}
+        <BlindDateCountdown />
+
         {/* Search + sort */}
         <div className="flex items-center gap-3 mb-4">
           <div className="flex-1 relative">

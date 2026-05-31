@@ -221,7 +221,7 @@ service cloud.firestore {
     // ─────────────────────────────────────────────
     match /settings/{docId} {
       allow read: if isSignedIn();
-      allow write: if false;
+      allow write: if isSignedIn() && request.auth.token.email == 'officialzed.10@gmail.com';
     }
 
 
