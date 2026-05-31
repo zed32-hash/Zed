@@ -106,7 +106,7 @@ service cloud.firestore {
     match /chats/{chatId} {
 
       allow read: if isSignedIn()
-                  && isChatParticipant(resource.data);
+                  && (resource == null || isChatParticipant(resource.data));
 
       allow create: if isSignedIn()
                     && request.auth.uid in request.resource.data.participants
