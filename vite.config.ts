@@ -30,6 +30,21 @@ export default defineConfig({
 
   assetsInclude: ['**/*.svg', '**/*.csv'],
 
+  build: {
+    rollupOptions: {
+      output: {
+        // Split large, rarely-changing dependencies into their own long-term
+        // cacheable chunks so app updates don't force a re-download of vendor code.
+        manualChunks: {
+          firebase: ['firebase/app', 'firebase/auth', 'firebase/firestore'],
+          mui: ['@mui/material', '@mui/icons-material', '@emotion/react', '@emotion/styled'],
+          motion: ['motion', '@react-spring/web'],
+          vendor: ['react', 'react-dom', 'react-router'],
+        },
+      },
+    },
+  },
+
   server: {
     host: '0.0.0.0',
     port: 5000,
