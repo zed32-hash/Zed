@@ -47,11 +47,11 @@ export function Footer({ dark }: FooterProps) {
               The anonymous dating space where who you are matters more than what you look like.
             </p>
             <div className="flex flex-col gap-2">
-              <a href="tel:+15794713458" className="flex items-center gap-2"
+              <a href="tel:+2347041795388" className="flex items-center gap-2"
                 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '0.875rem', color: muted, textDecoration: 'none', transition: 'color 0.2s' }}
                 onMouseEnter={(e) => (e.currentTarget.style.color = text)}
                 onMouseLeave={(e) => (e.currentTarget.style.color = muted)}>
-                <Phone size={14} /> +1 (579) 471-3458
+                <Phone size={14} /> +234 704 179 5388
               </a>
               <a href="mailto:officialzed@zohomail.com" className="flex items-center gap-2"
                 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: '0.875rem', color: muted, textDecoration: 'none', transition: 'color 0.2s' }}

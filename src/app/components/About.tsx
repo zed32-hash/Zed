@@ -47,7 +47,7 @@ export function About({ dark }: AboutProps) {
               { label: 'Founded', value: '2025', sub: 'Built in a basement. Launched to 4,200+ users.' },
               { label: 'Mission', value: 'Anti-appearance', sub: 'Connect people on personality, not profile photos.' },
               { label: 'Model', value: 'Free forever', sub: 'Core features are always free. Premium unlocks are optional.' },
-              { label: 'Support', value: '+1 (579) 471-3458', sub: 'Real humans. Mon–Fri 9 AM – 6 PM ET.' },
+              { label: 'Support', value: '+234 704 179 5388', sub: 'Real humans. Mon–Fri 9 AM – 6 PM ET.' },
             ].map((item) => (
               <div key={item.label} style={{ background: cardBg, border: `1px solid ${border}`, borderRadius: 16, padding: '1.25rem 1.5rem', backdropFilter: 'blur(12px)' }}>
                 <div className="flex items-center justify-between">

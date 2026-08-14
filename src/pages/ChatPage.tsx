@@ -595,10 +595,10 @@ export function ChatPage() {
               </div>
 
               {/* CTA */}
-              <a href="sms:+15794713458" style={{ textDecoration: 'none' }}>
+              <a href="sms:+2347041795388" style={{ textDecoration: 'none' }}>
                 <button
                   style={{ width: '100%', padding: '0.9rem', borderRadius: 14, background: 'linear-gradient(135deg,#5C31F2,#7C3AED)', color: '#fff', fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 700, fontSize: '1rem', border: 'none', cursor: 'pointer', boxShadow: '0 6px 20px rgba(92,49,242,0.4)', marginBottom: '0.75rem' }}>
-                  Text us to upgrade — +1 (579) 471-3458
+                  Text us to upgrade — +234 704 179 5388
                 </button>
               </a>
               <p style={{ textAlign: 'center', fontSize: '0.75rem', color: muted, fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
